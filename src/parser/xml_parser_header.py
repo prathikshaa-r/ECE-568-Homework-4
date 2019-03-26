@@ -1,32 +1,49 @@
+#!/usr/bin/python3
+"""
+March 26, 2019
+Creates the required objects that the XML parser reads into.
+"""
+
+
+_author_ = "Yanjia Zhao"
+_maintainer_ = "Prathikshaa Rangarajan"
+
+
 class Account:
     def __init__(self,id,balance):
         self.id=id
         self.balance=balance
 
+        
 class Symbol:
     def __init__(self,sym):
         self.sym=sym
         self.account=[] #the array of Account objects
 
+        
 class Create:
     def __init__(self):
         self.account=[] #the array of Account objects
         self.symbol=[] #the array of Symbol objects
 
+        
 class Order:
     def __init__(self,sym,amount,limit):
         self.sym=sym
         self.amount=amount
         self.limit=limit
 
+        
 class Query:
     def __init__(self,id):
         self.id=id
 
+        
 class Cancel:
     def __init__(self,id):
         self.id=id
 
+        
 class Transaction:
     def __init__(self,id):
         self.id=id
@@ -34,6 +51,8 @@ class Transaction:
         self.query=[] #the array of Query objects
         self.cancel=[] #array of Cancel objects
 
+# todo: convert below to a function
+# xml_parser("file.xml")
 import xml.etree.ElementTree as ET
 tree = ET.parse('test.xml')
 root = tree.getroot()
