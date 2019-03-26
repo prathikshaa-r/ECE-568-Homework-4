@@ -28,7 +28,7 @@ class user_socket:
 
     def bind(self, port, host=None):
         if host is None:
-            host = self.sock.gethostname()
+            host = socket.gethostname()
             pass
         self.sock.bind((host, port))
 
