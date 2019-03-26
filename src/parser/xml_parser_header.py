@@ -54,8 +54,10 @@ class Transaction:
 # todo: convert below to a function
 # xml_parser("file.xml")
 import xml.etree.ElementTree as ET
-tree = ET.parse('test.xml')
+tree = ET.parse('../../test/country_data.xml')
 root = tree.getroot()
+
+#process create object here
 if root.tag=='create':
     create=Create()
     for child in root:
@@ -73,16 +75,16 @@ if root.tag=='create':
                 account = Account(id2,num)
                 sym.account.append(account)
             create.symbol.append(sym)
-    #process create object here
-    """
+
+            
     for account in create.account:
         print(account.id, account.balance)
     for symbol in create.symbol:
         print(symbol.sym)
         for account in symbol.account:
             print(account.id, account.balance)
-    """
 
+#process transaction object here
 if root.tag=='transactions':
     id1=root.attrib.get('id')
     transaction=Transaction(id1)
@@ -101,14 +103,13 @@ if root.tag=='transactions':
             id2 = child.attrib.get('id')
             cancel=Cancel(id2)
             transaction.cancel.append(cancel)
-    #process transaction object here
-    """
-    print(transaction.id)
+
+    print("Transaction ID: ", transaction.id)
     for order in transaction.order:
         print(order.sym,order.amount,order.limit)
     for query in transaction.query:
         print(query.id)
     for cancel in transaction.cancel:
         print(cancel.id)
-    """
+
 
