@@ -17,7 +17,6 @@ class Account:
     def __init__(self,id,balance):
         self.id=id
         self.balance=balance
-        self.type='account'
 
     """
     print function
@@ -34,7 +33,6 @@ class Position:
         self.symbol=symbol
         self.account_id = acc_id #the array of Account objects
         self.number = number # no. of shares of the symbol to be added to the account
-        self.type='position'
 
     """
     print function
@@ -49,6 +47,8 @@ class Position:
         
 class Create_obj:
     def __init__(self):
+        self.account=[] #the array of Account objects
+        self.position=[] #the array of Position objects
         self.sequence=[]
 
     """
@@ -152,7 +152,7 @@ def parse_xml():
                 id1=child.attrib.get('id')
                 balance=child.attrib.get('balance')
                 account=Account(id1,balance)
-                #create_obj.account.append(account)
+                create_obj.account.append(account)
                 create_obj.sequence.append(account)
                 pass
 
@@ -165,7 +165,7 @@ def parse_xml():
                     pass
 
                 pos = Position(sym, position_acc_id, num)
-                #create_obj.position.append(pos)
+                create_obj.position.append(pos)
                 create_obj.sequence.append(pos)
                 pass
             pass
