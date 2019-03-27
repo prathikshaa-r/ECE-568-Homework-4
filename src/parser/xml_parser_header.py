@@ -28,19 +28,19 @@ class Account:
         return ''
 
         
-class Symbol:
-    def __init__(self,sym):
-        self.sym=sym
-        self.account=[] #the array of Account objects
+class Position:
+    def __init__(self, symbol, acc_id, number):
+        self.symbol=symbol
+        self.account_id = acc_id #the array of Account objects
+        self.number = number # no. of shares of the symbol to be added to the account
 
     """
     print function
     """
     def __repr__(self):
-        print('Symbol: ', self.sym)
-        for accountInd in range (0, len(self.account)):
-            print('Symbol Account:\n', self.account[accountInd])
-            pass
+        print('Symbol: ', self.symbol)
+        print('Account ID: ', self.account_id)
+        print('Num. of shares of symbol: ', self.number)
             
         return ''
 
@@ -48,15 +48,15 @@ class Symbol:
 class Create_obj:
     def __init__(self):
         self.account=[] #the array of Account objects
-        self.symbol=[] #the array of Symbol objects
+        self.position=[] #the array of Position objects
 
     """
     print function
     """        
     def __repr__(self):
         print('Create:')
-        for symbolInd in range (0, len(self.symbol)):
-            print(self.symbol[symbolInd])
+        for positionInd in range (0, len(self.position)):
+            print(self.position[positionInd])
             pass
             
         for accountInd in range (0, len(self.account)):
@@ -143,7 +143,7 @@ class Transaction_obj:
 import xml.etree.ElementTree as ET
 
 def parse_xml():
-    tree = ET.parse('../../test/transaction_template.xml')
+    tree = ET.parse('../../test/create_template.xml')
     root = tree.getroot()
 
     #process create object here
@@ -158,15 +158,15 @@ def parse_xml():
                 pass
 
             elif child.tag=='symbol':
-                symbol=child.attrib.get('sym')
-                sym=Symbol(symbol)
+                sym=child.attrib.get('sym')
+
                 for grandchild in child:
-                    id2=grandchild.attrib.get('id')
+                    position_acc_id=grandchild.attrib.get('id')
                     num=grandchild.text
-                    account = Account(id2,num)
-                    sym.account.append(account)
                     pass
-                create_obj.symbol.append(sym)
+
+                pos = Position(sym, position_acc_id, num)
+                create_obj.position.append(pos)
                 pass
             pass
         print(create_obj)
