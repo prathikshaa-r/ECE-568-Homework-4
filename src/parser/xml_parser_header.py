@@ -18,6 +18,7 @@ class Account:
         self.id=id
         self.balance=balance
         self.type='account'
+        self.create=True ##True means created succuss, FALSE means error; True as default
 
     """
     print function
@@ -35,6 +36,7 @@ class Position:
         self.account_id = acc_id #the array of Account objects
         self.number = number # no. of shares of the symbol to be added to the account
         self.type='position'
+        self.create=True ##True means created succuss, FALSE means error; True as default
 
     """
     print function
@@ -73,6 +75,7 @@ class Order:
         self.sym=sym
         self.amount=amount
         self.limit=limit
+        self.type='order'
 
     """
     print function
@@ -89,6 +92,7 @@ class Order:
 class Query:
     def __init__(self,id):
         self.id=id
+        self.type='query'
 
     """
     print function
@@ -101,6 +105,7 @@ class Query:
 class Cancel:
     def __init__(self,id):
         self.id=id
+        self.type='cancel'
 
     """
     print function
@@ -113,15 +118,19 @@ class Cancel:
 class Transaction_obj:
     def __init__(self,id):
         self.id=id
+        """
         self.order=[] #the array of Order objects
         self.query=[] #the array of Query objects
         self.cancel=[] #array of Cancel objects
+        """
+        self.sequence=[]
 
     """
     print function
     """        
     def __repr__(self):
         print('Transaction ID: ', self.id)
+        """
         for orderInd in range (0, len(self.order)):
             print(self.order[orderInd])
             pass
@@ -133,6 +142,9 @@ class Transaction_obj:
         for cancelInd in range (0, len(self.cancel)):
             print(self.cancel[cancelInd])
             pass
+        """
+        for element in self.sequence:
+            print(element)
             
         return ''
 
@@ -141,7 +153,7 @@ class Transaction_obj:
 import xml.etree.ElementTree as ET
 
 def parse_xml():
-    tree = ET.parse('../../test/create_template.xml')
+    tree = ET.parse('../../test/transaction_template.xml')
     root = tree.getroot()
 
     #process create object here
@@ -190,19 +202,19 @@ def parse_xml():
                 amount=child.attrib.get('amount')
                 limit = child.attrib.get('limit')
                 order=Order(symbol,amount,limit)
-                transaction_obj.order.append(order)
+                transaction_obj.sequence.append(order)
                 pass
 
             elif child.tag=='query':
                 id2 = child.attrib.get('id')
                 query=Query(id2)
-                transaction_obj.query.append(query)
+                transaction_obj.sequence.append(query)
                 pass
 
             elif child.tag=='cancel':
                 id2 = child.attrib.get('id')
                 cancel=Cancel(id2)
-                transaction_obj.cancel.append(cancel)
+                transaction_obj.sequence.append(cancel)
                 pass
             pass
 
