@@ -1,5 +1,5 @@
 CREATE TABLE Accounts (
-	account_id SERIAL PRIMARY KEY,
+	account_id int PRIMARY KEY,
 	balance real NOT NULL
 );
 
