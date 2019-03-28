@@ -19,6 +19,7 @@ class Account:
         self.balance=balance
         self.type='account'
         self.create=True ##True means created succuss, FALSE means error; True as default
+        self.msg="Msg"
 
     """
     print function
@@ -37,7 +38,7 @@ class Position:
         self.number = number # no. of shares of the symbol to be added to the account
         self.type='position'
         self.create=True ##True means created succuss, FALSE means error; True as default
-
+        self.msg="Msg"
     """
     print function
     """
@@ -76,6 +77,9 @@ class Order:
         self.amount=amount
         self.limit=limit
         self.type='order'
+        self.open=True
+        self.msg="Msg"
+        self.id=0 #the order id to be determined by the server when this order is deployed
 
     """
     print function
