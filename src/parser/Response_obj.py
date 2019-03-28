@@ -1,9 +1,9 @@
 class Sub_Response:
-    def __init__(self,id,status,price,share,time):
-        self.transaction=id
+    def __init__(self,trans_id,status,price,shares,time):
+        self.trans_id=trans_id
         self.status=status
         self.price=price
-        self.share=share
+        self.shares=shares
         self.time=time
 
 class Response:
