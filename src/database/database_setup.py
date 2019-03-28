@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 import psycopg2
+import sys
+
 try:
     database='exchange_matching'
     conn = psycopg2.connect(database='exchange_matching',\
@@ -18,7 +20,7 @@ try:
     balance real NOT NULL
     );''')
 
-    cur.commit()
+    conn.commit()
 except:
     print ('Table Accounts may already exist.')
     pass
@@ -31,7 +33,7 @@ try:
     account_id int NOT NULL,
     FOREIGN KEY(account_id) REFERENCES Accounts(account_id) ON DELETE CASCADE
     );''')
-    cur.commit()
+    conn.commit()
 except:
     print ("Table Positions may already exist.")
     pass
@@ -39,7 +41,7 @@ except:
 try:
     cur.execute('''CREATE TYPE order_status \
     AS ENUM ('open', 'cancelled','executed');''')
-    cur.commit()
+    conn.commit()
 except:
     print ("order_status enum may already exist.")
     pass
@@ -57,7 +59,7 @@ try:
     /* need to add time */
     FOREIGN KEY(account_id) REFERENCES Accounts(account_id) ON DELETE CASCADE /* ideally on delete set status to cancelled */
     );''')
-    cur.commit()
+    conn.commit()
 except:
     print ("Table Orders may already exist.")
     pass

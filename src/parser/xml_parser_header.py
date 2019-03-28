@@ -8,6 +8,8 @@ Creates the required objects that the XML parser reads into.
 _author_ = "Yanjia Zhao"
 _maintainer_ = "Prathikshaa Rangarajan"
 
+import xml.etree.ElementTree as ET
+
 
 """
 classes for Create_obj
@@ -154,10 +156,9 @@ class Transaction_obj:
 
 # todo: convert below to a function
 # xml_parser("file.xml")
-import xml.etree.ElementTree as ET
 
 def parse_xml():
-    tree = ET.parse('../../test/transaction_template.xml')
+    tree = ET.parse('../../test/create_1.xml')
     root = tree.getroot()
 
     #process create object here
