@@ -12,7 +12,7 @@ cur.execute('''CREATE TABLE COMPANY
       AGE            INT     NOT NULL,
       ADDRESS        CHAR(50),
       SALARY         REAL);''')
-print "Table created successfully"
+print ("Table created successfully")
 
 conn.commit()
 conn.close()

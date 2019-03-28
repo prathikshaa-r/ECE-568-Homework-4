@@ -37,7 +37,7 @@ FOREIGN KEY(account_id) REFERENCES Accounts(account_id) ON DELETE CASCADE /* ide
 );''')
 
 
-print "Table created successfully"
+print ("Table created successfully")
 
 conn.commit()
 conn.close()
