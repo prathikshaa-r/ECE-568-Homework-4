@@ -17,7 +17,7 @@ classes for Create_obj
 
 class Account:
     def __init__(self,id,balance):
-        self.id=id
+        self.id=id # should be string
         self.balance=balance
         self.type='account'
         self.create=True ##True means created succuss, FALSE means error; True as default
@@ -36,7 +36,7 @@ class Account:
 class Position:
     def __init__(self, symbol, acc_id, number):
         self.symbol=symbol
-        self.account_id = acc_id #the array of Account objects
+        self.account_id = acc_id #the array of Account objects, should be string
         self.number = number # no. of shares of the symbol to be added to the account
         self.type='position'
         self.create=True ##True means created succuss, FALSE means error; True as default
