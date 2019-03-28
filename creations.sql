@@ -48,7 +48,7 @@ UPDATE Orders SET Status='cancelled' WHERE trans_id=5
 SELECT * FROM Orders WHERE limit_price = (SELECT max(limit_price) FROM Orders WHERE amount>0);
 
 SELECT * FROM Orders
-WHERE limit_price = (SELECT max(limit_price) FROM Orders WHERE amount<0);
+WHERE limit_price = (SELECT min(limit_price) FROM Orders WHERE amount<0);
 
 /* Executed */
 /* executed in part 
