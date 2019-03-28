@@ -1,21 +1,8 @@
+#!/usr/bin/python3
 from xml.etree.ElementTree import Element, SubElement
 from ElementTree_pretty import prettify
 from xml_parser_header import Create_obj,Account,Position
 from Response_obj import Sub_Response, Response
-
-
-"""
-top = Element('top')
-comment = Comment('Generated for PyMOTW')
-top.append(comment)
-myattributes={"gender":"male"}
-child = SubElement(top, 'child',myattributes)
-child.text = 'This child contains text.'
-child_with_tail = SubElement(top, 'child_with_tail')
-child_with_tail.text = 'This child has regular text.'
-
-print(prettify(top))
-"""
 
 ##response of create
 def create_response(create):#create=Create_obj()
@@ -30,7 +17,7 @@ def create_response(create):#create=Create_obj()
                 node=SubElement(top,'error',attributes)
                 node.text=child.msg
         
-        if child.type=='position':
+        elif child.type=='position':
             if child.create:
                 attributes={"sym":child.symbol,"id":child.account_id}
                 node=SubElement(top,'created',attributes)
@@ -38,6 +25,8 @@ def create_response(create):#create=Create_obj()
                 attributes={"sym":child.symbol,"id":child.account_id}
                 node=SubElement(top,'error',attributes)
                 node.text=child.msg
+    print(prettify(top))
+
 
 
 
@@ -83,11 +72,14 @@ def transaction_response(transaction):
                     subnode = SubElement(node, 'executed', attributes)
 
 """
-account1= Account(1,1000)
-account2=Account(2,2000)
+create_response() test
+"""
+"""
+account1=Account('1',1000)
+account2=Account('2',2000)
 account2.create=False
-position1=Position('STOCK1',1,200)
-position2=Position('STOCK2',2,300)
+position1=Position('STOCK1','1',200)
+position2=Position('STOCK2','2',300)
 position2.create=False
 create=Create_obj()
 create.sequence.append(account1)
@@ -98,15 +90,4 @@ create_response(create)
 """
 
 
-top = Element('top')
-
-myattributes={"gender":"male"}
-child = SubElement(top, 'child',myattributes)
-child.text = 'This child contains text.'
-
-child_with_tail = SubElement(top, 'child_with_tail')
-child_with_tail.text = 'This child has regular text.'
-
-
-print(prettify(top))
 
