@@ -6,7 +6,12 @@ try:
                                 user='postgres', password='passw0rd',\
                                 host='0.0.0.0', port='5432')
 
-    print("Opened database %s successfully" % database)
+    print("Opened database %s successfully." % database)
+except:
+    print("Failed to connect to database %s.", database)
+    pass
+
+try:    
     cur = conn.cursor()
     cur.execute('''CREATE TABLE Accounts (
     account_id int PRIMARY KEY,
@@ -15,28 +20,32 @@ try:
 
     cur.commit()
 except:
-        print ('Table Accounts may already exist')
+    print ('Table Accounts may already exist.')
+    pass
 
 try:
-        cur.execute('''CREATE TABLE Positions (
-        position_id SERIAL PRIMARY KEY,
+    cur.execute('''CREATE TABLE Positions (
+    position_id SERIAL PRIMARY KEY,
     symbol varchar(10) NOT NULL,
     amount real NOT NULL, /* positive real number */
     account_id int NOT NULL,
     FOREIGN KEY(account_id) REFERENCES Accounts(account_id) ON DELETE CASCADE
     );''')
-        cur.commit()
+    cur.commit()
 except:
-        print ("Table Positions may already exist.")
+    print ("Table Positions may already exist.")
+    pass
 
 try:
-        cur.execute('''CREATE TYPE order_status \
-        AS ENUM ('open', 'cancelled','executed');''')
-        cur.commit()
+    cur.execute('''CREATE TYPE order_status \
+    AS ENUM ('open', 'cancelled','executed');''')
+    cur.commit()
 except:
-        print ("order_status enum may already exist")
+    print ("order_status enum may already exist.")
+    pass
+
 try:
-        cur.execute('''
+    cur.execute('''
     CREATE TABLE Orders (
     order_id SERIAL PRIMARY KEY,
     trans_id int NOT NULL,
@@ -48,7 +57,9 @@ try:
     /* need to add time */
     FOREIGN KEY(account_id) REFERENCES Accounts(account_id) ON DELETE CASCADE /* ideally on delete set status to cancelled */
     );''')
-        cur.commit()
+    cur.commit()
 except:
-    print ("Table Orders may already exist")
+    print ("Table Orders may already exist.")
+    pass
+
 conn.close()
