@@ -21,21 +21,19 @@ while True:
     connection, client_address = sock.accept()
     try:
         print('connection from', client_address)
-
-        # Receive the data in small chunks and retransmit it                                                     
-        with open('received_file','wb') as f:
-            while True:
-                data = connection.recv(1024)
-                print('received {!r}'.format(data))
-                if data:
-                    """                                                                                          
-                    print('sending data back to the client')                                                     
-                    connection.sendall(data)                                                                     
-                    """
-                else:
-                    break
-                f.write(data)
-        parse_xml('received_file')
+        # Receive the data in small chunks and retransmit it
+        recv_string=""
+        while True:
+            data = connection.recv(1024)
+            if data:
+                """                                                                                          
+                print('sending data back to the client')                                                     
+                connection.sendall(data)                                                                     
+                """
+            else:
+                break
+            recv_string+=data.decode("utf-8")
+        parse_xml(recv_string)
     finally:
         # Clean up the connection
         connection.close()

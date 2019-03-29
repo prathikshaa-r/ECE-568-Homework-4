@@ -137,10 +137,10 @@ class Transaction_obj:
 # todo: convert below to a function
 # xml_parser("file.xml")
 
-def parse_xml(file_path):
-    tree = ET.parse(file_path)
-    root = tree.getroot()
-
+def parse_xml(recv_string):
+    #tree = ET.parse(file_path)
+    #root = tree.getroot()
+    root=ET.fromstring(recv_string)
     #process create object here
     if root.tag=='create':
         create_obj=Create_obj()
