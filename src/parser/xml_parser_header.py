@@ -79,9 +79,6 @@ class Order:
         self.amount=amount
         self.limit=limit
         self.type='order'
-        self.open=True
-        self.msg="Msg"
-        self.id=0 #the order id to be determined by the server when this order is deployed
 
     """
     print function
