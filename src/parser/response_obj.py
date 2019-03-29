@@ -22,7 +22,5 @@ class TransactionResponse:
         self.request=request # query or cancel
         self.trans_resp=[] #the array of Sub_Response objects
 
-
-
 #Response=[]
 #contains Order_resp and TransactionResponse
