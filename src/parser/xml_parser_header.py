@@ -121,11 +121,6 @@ class Cancel:
 class Transaction_obj:
     def __init__(self,id):
         self.id=id
-        """
-        self.order=[] #the array of Order objects
-        self.query=[] #the array of Query objects
-        self.cancel=[] #array of Cancel objects
-        """
         self.sequence=[]
 
     """
@@ -133,19 +128,7 @@ class Transaction_obj:
     """        
     def __repr__(self):
         print('Transaction ID: ', self.id)
-        """
-        for orderInd in range (0, len(self.order)):
-            print(self.order[orderInd])
-            pass
-            
-        for queryInd in range (0, len(self.query)):
-            print( self.query[queryInd])
-            pass
 
-        for cancelInd in range (0, len(self.cancel)):
-            print(self.cancel[cancelInd])
-            pass
-        """
         for element in self.sequence:
             print(element)
             
@@ -154,8 +137,8 @@ class Transaction_obj:
 # todo: convert below to a function
 # xml_parser("file.xml")
 
-def parse_xml():
-    tree = ET.parse('../../test/create_1.xml')
+def parse_xml(file_path):
+    tree = ET.parse(file_path)
     root = tree.getroot()
 
     #process create object here
@@ -233,6 +216,4 @@ def parse_xml():
     #     pass
     # pass
 
-
-parse_xml()
 
