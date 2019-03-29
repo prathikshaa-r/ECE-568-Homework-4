@@ -11,6 +11,7 @@ try:
     print("Opened database %s successfully." % database)
 except:
     print("Failed to connect to database %s.", database)
+    sys.exit()
     pass
 
 try:    
