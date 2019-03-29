@@ -1,6 +1,8 @@
 #socket_echo_server.py                                                                                           
 import socket
 import sys
+sys.path.append('../parser')
+from xml_parser_header import parse_xml
 
 # Create a TCP/IP socket                                                                                         
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -33,3 +35,7 @@ while True:
                 else:
                     break
                 f.write(data)
+        parse_xml('received_file')
+    finally:
+        # Clean up the connection
+        connection.close()
