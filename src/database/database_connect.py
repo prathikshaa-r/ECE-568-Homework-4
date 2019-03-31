@@ -9,6 +9,18 @@ _maintainer_= "Prahikshaa Rangarajan"
 import psycopg2
 import sys
 
+# sys.path.append('..')
+# import parser.xml_parser_header
+
+# if __name__ == "__main__" and __package__ is None:
+#         from sys import path
+#         from os.path import dirname as dir
+
+#         path.append(dir(path[0]))
+#         from src.parser.xml_parser_header import Accounts
+
+# from parser.xml_parser_header import Accounts
+
 # Connects to the database and returns database connection object
 def connect():
     try:
