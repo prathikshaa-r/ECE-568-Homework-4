@@ -35,11 +35,15 @@ def connect():
         pass
     return conn
 
-# Takes a connection object and account creation fields
-# creates account, if successful, returns connection object
-# else raises
-# -- psycopg2.IntegrityError
-# -- ValueError
+#-------------------------------Creations--------------------------------#
+
+'''
+ Takes a connection object and account creation fields
+ creates account, if successful, returns connection object
+ else raises
+ -- psycopg2.IntegrityError
+ -- ValueError
+'''
 def create_account(conn, account_id, balance):
     try:
         account_id_int = int(account_id)
@@ -87,7 +91,20 @@ def create_position(conn, symbol, amount, account_id):
 
     try:
         cur = conn.cursor()
-        cur.execute()
+        cur.execute('''SELECT COUNT(*) FROM Positions
+        WHERE symbol = %s AND account_id = %s''', (symbol, account_id))
+        row = cur.fetchone()
+
+        # update if position already exists
+        if row[0] == 1:
+            cur.execute('''UPDATE Positions SET amount = amount + %s 
+            WHERE symbol = %s AND account_id = %s''', (amount, symbol, account_id))
+            pass
+        # create new, if no such position exists
+        else:
+            cur.execute('''INSERT INTO Positions (symbol, amount, account_id) 
+            VALUES(%s, %s, %s)''', (symbol, amount, account_id))
+            pass
 
         conn.commit()
 
@@ -98,3 +115,24 @@ def create_position(conn, symbol, amount, account_id):
         pass
     conn.commit()
     return conn
+
+def test_position_creation():
+    try:
+        create_position(connect(), "ac", 100, 12)
+    except ValueError:
+        print("Invalid position format")
+        pass
+    except:
+        print("Postion creation failed due to unknown reasons")
+        pass
+           
+#-----------------------------------------Transactions-----------------------------------------#
+
+def create_order(conn, trans_id, symbol, amount, limit_price, account_id):
+    
+
+
+
+
+
+
