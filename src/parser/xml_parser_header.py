@@ -16,18 +16,18 @@ classes for Create_obj
 """
 
 class Account:
-    def __init__(self,id,balance):
-        self.id=id # should be string
-        self.balance=balance
-        self.type='account'
-        self.create=True ##True means created succuss, FALSE means error; True as default
-        self.msg="Msg"
+    def __init__(self, acc_id, balance):
+        self.acc_id = acc_id # should be string
+        self.balance = balance
+        self.type = 'account'
+        self.created = True ##True means created succuss, FALSE means error; True as default
+        self.err = ""
 
     """
     print function
     """
     def __repr__(self):
-        print('Account ID: ', self.id)
+        print('Account ID: ', self.acc_id)
         print('Account Balance: ', self.balance)
 
         return ''
@@ -35,12 +35,12 @@ class Account:
         
 class Position:
     def __init__(self, symbol, acc_id, number):
-        self.symbol=symbol
+        self.symbol = symbol
         self.account_id = acc_id #the array of Account objects, should be string
         self.number = number # no. of shares of the symbol to be added to the account
-        self.type='position'
-        self.create=True ##True means created succuss, FALSE means error; True as default
-        self.msg="Msg"
+        self.type = 'position'
+        self.created = True ##True means created succuss, FALSE means error; True as default
+        self.err = ""
     """
     print function
     """
@@ -61,8 +61,8 @@ class Create_obj:
     """        
     def __repr__(self):
         print('Create:')
-        for positionInd in range (0, len(self.sequence)):
-            print(self.sequence[positionInd])
+        for index in range (0, len(self.sequence)):
+            print(self.sequence[index])
             pass    
         
        
@@ -74,11 +74,11 @@ classes for Transaction_obj
 """
         
 class Order:
-    def __init__(self,sym,amount,limit):
-        self.sym=sym
-        self.amount=amount
-        self.limit=limit
-        self.type='order'
+    def __init__(self, sym, amount, limit_price):
+        self.sym = sym
+        self.amount = amount
+        self.limit_price = limit_price
+        self.type = 'order'
 
     """
     print function
@@ -88,14 +88,14 @@ class Order:
         print('Order:')
         print('Symbol: ', self.sym)
         print('Amount: ', self.amount)
-        print('Limit: ', self.limit)
+        print('Limit: ', self.limit_price)
 
         return ''
         
 class Query:
-    def __init__(self,id):
-        self.id=id
-        self.type='query'
+    def __init__(self, id):
+        self.id = id
+        self.type = 'query'
 
     """
     print function
@@ -106,9 +106,9 @@ class Query:
 
         
 class Cancel:
-    def __init__(self,id):
-        self.id=id
-        self.type='cancel'
+    def __init__(self, id):
+        self.id = id
+        self.type = 'cancel'
 
     """
     print function
@@ -119,9 +119,9 @@ class Cancel:
 
         
 class Transaction_obj:
-    def __init__(self,id):
-        self.id=id
-        self.sequence=[]
+    def __init__(self, id):
+        self.id = id
+        self.sequence = []
 
     """
     print function
