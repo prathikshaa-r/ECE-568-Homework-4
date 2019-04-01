@@ -70,7 +70,9 @@ def create_account(conn, account_id, balance):
 
 def test_account_creation():
     try:
-        create_account(connect(), 10, 1234.45)
+        db_conn = connect()
+        create_account(db_conn, 10, 1234.45)
+        db_conn.close()
     except psycopg2.IntegrityError:
         print("Account already exists")
         pass
@@ -91,6 +93,9 @@ def create_position(conn, symbol, amount, account_id):
 
     try:
         cur = conn.cursor()
+
+    # read-modify write start
+    # lock(symbol)
         cur.execute('''SELECT COUNT(*) FROM Positions
         WHERE symbol = %s AND account_id = %s''', (symbol, account_id))
         row = cur.fetchone()
@@ -107,6 +112,8 @@ def create_position(conn, symbol, amount, account_id):
             pass
 
         conn.commit()
+    # unlock(symbol)
+    # read-modify-write end
 
     except psycopg2.IntegrityError:
         raise
@@ -118,7 +125,9 @@ def create_position(conn, symbol, amount, account_id):
 
 def test_position_creation():
     try:
-        create_position(connect(), "ac", 100, 12)
+        db_conn = connect()
+        create_position(db_conn, "ac", 100, 12)
+        db_conn.close()
     except ValueError:
         print("Invalid position format")
         pass
@@ -129,10 +138,54 @@ def test_position_creation():
 #-----------------------------------------Transactions-----------------------------------------#
 
 def create_order(conn, trans_id, symbol, amount, limit_price, account_id):
+    # type checking inputs
+    try:
+        amount_float = float(amount)
+        account_id_int = int(account_id)
+        limit_price_float = float(limite_price)
+    except: # ValueError
+        raise
+
+    buy = True
+    if amount < 0 :
+        buy = False
+        pass
+
+    '''
+    Buy Order
+    Reduce balance in Accounts
+    '''
+    if buy is true:
+        try:
+            cur = conn.cursor()
+            cur.execute('''SELECT balance FROM Accounts WHERE accoutn_id = %s''', (account_id,))
+            row = cur.fetchone()
+            balance = row[0]
+            share_price = limit_price * amount
+            if balance < share_price:
+                # Insufficient funds error
+                return
+            cur.execute('''UPDATE Accounts SET balance = balance-%s WHERE accoutn_id = %s''', (share_price,account_id))
+            cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (trans_id, symbol, amount, limit_price, account_id))
+            conn.commit()
+
+        except psycopg2.IntegrityError:
+            raise
+        except:
+            print ('Failed to create buy order', sys.exc_info())
+            pass
+        conn.commit()
+        pass
     
-
-
-
-
-
-
+    '''
+    Sell Order
+    Reduce amount in positions
+    '''
+    else:
+        try:
+            cur = conn.curson()
+            cur.execute('''SELECT COUNT(*) FROM Positons 
+            WHERE symbol = %s''')
+            
+    
+    
