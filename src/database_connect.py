@@ -9,7 +9,7 @@ _maintainer_= "Prahikshaa Rangarajan"
 import psycopg2
 import sys
 
-from ..parser.xml_parser_header import *
+from xml_parser_header import *
 
 # sys.path.append('..')
 # import parser.xml_parser_header
@@ -46,8 +46,8 @@ def connect():
  -- psycopg2.IntegrityError
  -- ValueError
 '''
-test_account= Account()
-create_account(connect(), test_account)
+#test_account= Account()
+#create_account(connect(), test_account)
 
 def create_account(conn, account):
     try:
@@ -55,7 +55,7 @@ def create_account(conn, account):
         balance_float = float(account.balance)
     except: # ValueError
         account.created = False
-        account.err = "Invalid Account Format"
+        account.err = "Invalid Account Format" + sys.exc_info()
 
     try:    
         cur = conn.cursor()
@@ -71,11 +71,11 @@ def create_account(conn, account):
         account.err = "Account already exists."
     except:
         account.creasted = False
-        account.err = "Account creation failed due to unknown reasons."
+        account.err = "Account creation failed due to unknown reasons." + sys.exc_info()
         # print ('Failed to create account', sys.exc_info())
         pass
     conn.commit()
-    return conn
+    return account
 
 def test_account_creation():
     try:
@@ -92,8 +92,8 @@ def test_account_creation():
     pass
 
 
-test_position = Position()
-create_position(connect(), test_position)
+#test_position = Position()
+#create_position(connect(), test_position)
 
 def create_position(conn, position):
     try:
@@ -101,7 +101,7 @@ def create_position(conn, position):
         account_id_int = int(position.account_id)
     except: # ValueError
         position.created = False
-        position.err = "Invalid position format"
+        position.err = "Invalid position format"  + sys.exc_info()
 
     try:
         cur = conn.cursor()
@@ -125,14 +125,14 @@ def create_position(conn, position):
     except psycopg2.IntegrityError:
         # raise
         position.created = False
-        position.err = "Postion creation failed due to unknown reasons"
+        position.err = "Postion creation failed due to unknown reasons" + sys.exc_info()
     except:
         # print ('Failed to create position', sys.exc_info())
         # pass
         position.created = False
-        position.err = "Postion creation failed due to unknown reasons"
+        position.err = "Postion creation failed due to unknown reasons" + sys.exc_info()
     conn.commit()
-    return conn
+    return position
 
 def test_position_creation():
     try:
