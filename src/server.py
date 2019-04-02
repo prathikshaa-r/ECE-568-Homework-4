@@ -3,8 +3,11 @@
 import socket
 import sys
 import threading
-sys.path.append('../parser')
+
 from xml_parser_header import parse_xml
+from database_connect import *
+from database_setup import *
+
 
 def process_request(connection, client_address):
     try:
@@ -17,7 +20,19 @@ def process_request(connection, client_address):
                 recv_string += data.decode("utf-8")
             else:
                 break
-        parse_xml(recv_string)
+        obj=parse_xml(recv_string)
+        for sub in obj.sequence:
+            if sub.type=='account':
+                obj = create_account(connect(),sub)
+                print(obj)
+                print("Error:")
+                print(obj.err)
+            if sub.type=='position':
+                obj = create_position(connect(),sub)
+                print(obj)
+                print("Error:")
+                print(obj.err)
+
     finally:
         # Clean up the connection
         connection.close()

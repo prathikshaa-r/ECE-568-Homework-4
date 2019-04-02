@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 #socket_echo_client.py
 import socket
 import sys

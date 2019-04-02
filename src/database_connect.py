@@ -9,6 +9,8 @@ _maintainer_= "Prahikshaa Rangarajan"
 import psycopg2
 import sys
 
+from xml_parser_header import *
+
 # sys.path.append('..')
 # import parser.xml_parser_header
 
@@ -44,29 +46,36 @@ def connect():
  -- psycopg2.IntegrityError
  -- ValueError
 '''
-def create_account(conn, account_id, balance):
+#test_account= Account()
+#create_account(connect(), test_account)
+
+def create_account(conn, account):
     try:
-        account_id_int = int(account_id)
-        balance_float = float(balance)
+        account_id_int = int(account.account_id)
+        balance_float = float(account.balance)
     except: # ValueError
-        raise
-    
+        account.created = False
+        account.err = "Invalid Account Format" + sys.exc_info()
+
     try:    
         cur = conn.cursor()
         cur.execute('''INSERT INTO Accounts
         (account_id, balance)
         VALUES (%s, %s);'''
-                    , (account_id, balance))
+                    , (account.account_id, account.balance))
 
         conn.commit()
 
     except psycopg2.IntegrityError:
-        raise
+        account.created = False
+        account.err = "Account already exists."
     except:
-        print ('Failed to create account', sys.exc_info())
+        account.creasted = False
+        account.err = "Account creation failed due to unknown reasons." + sys.exc_info()
+        # print ('Failed to create account', sys.exc_info())
         pass
     conn.commit()
-    return conn
+    return account
 
 def test_account_creation():
     try:
@@ -84,12 +93,17 @@ def test_account_creation():
         pass
     pass
 
-def create_position(conn, symbol, amount, account_id):
+
+#test_position = Position()
+#create_position(connect(), test_position)
+
+def create_position(conn, position):
     try:
-        amount_float = float(amount)
-        account_id_int = int(account_id)
+        amount_float = float(position.amount)
+        account_id_int = int(position.account_id)
     except: # ValueError
-        raise
+        position.created = False
+        position.err = "Invalid position format"  + sys.exc_info()
 
     try:
         cur = conn.cursor()
@@ -97,18 +111,18 @@ def create_position(conn, symbol, amount, account_id):
     # read-modify write start
     # lock(symbol)
         cur.execute('''SELECT COUNT(*) FROM Positions
-        WHERE symbol = %s AND account_id = %s''', (symbol, account_id))
+        WHERE symbol = %s AND account_id = %s''', (position.symbol, position.account_id))
         row = cur.fetchone()
 
         # update if position already exists
         if row[0] == 1:
             cur.execute('''UPDATE Positions SET amount = amount + %s 
-            WHERE symbol = %s AND account_id = %s''', (amount, symbol, account_id))
+            WHERE symbol = %s AND account_id = %s''', (position.amount, position.symbol, position.account_id))
             pass
         # create new, if no such position exists
         else:
             cur.execute('''INSERT INTO Positions (symbol, amount, account_id) 
-            VALUES(%s, %s, %s)''', (symbol, amount, account_id))
+            VALUES(%s, %s, %s)''', (position.symbol, position.amount, position.account_id))
             pass
 
         conn.commit()
@@ -116,12 +130,16 @@ def create_position(conn, symbol, amount, account_id):
     # read-modify-write end
 
     except psycopg2.IntegrityError:
-        raise
+        # raise
+        position.created = False
+        position.err = "Postion creation failed due to unknown reasons" + sys.exc_info()
     except:
-        print ('Failed to create position', sys.exc_info())
-        pass
+        # print ('Failed to create position', sys.exc_info())
+        # pass
+        position.created = False
+        position.err = "Postion creation failed due to unknown reasons" + sys.exc_info()
     conn.commit()
-    return conn
+    return position
 
 def test_position_creation():
     try:

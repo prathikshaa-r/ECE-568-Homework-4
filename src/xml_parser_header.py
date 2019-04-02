@@ -16,8 +16,8 @@ classes for Create_obj
 """
 
 class Account:
-    def __init__(self, acc_id, balance):
-        self.acc_id = acc_id # should be string
+    def __init__(self, account_id, balance):
+        self.account_id = account_id # should be string
         self.balance = balance
         self.type = 'account'
         self.created = True ##True means created succuss, FALSE means error; True as default
@@ -27,16 +27,16 @@ class Account:
     print function
     """
     def __repr__(self):
-        print('Account ID: ', self.acc_id)
+        print('Account ID: ', self.account_id)
         print('Account Balance: ', self.balance)
 
         return ''
 
         
 class Position:
-    def __init__(self, symbol, acc_id, number):
+    def __init__(self, symbol, account_id, amount):
         self.symbol = symbol
-        self.account_id = acc_id #the array of Account objects, should be string
+        self.account_id = account_id #the array of Account objects, should be string
         self.amount = amount # no. of shares of the symbol to be added to the account
         self.type = 'position'
         self.created = True ##True means created succuss, FALSE means error; True as default
@@ -47,7 +47,7 @@ class Position:
     def __repr__(self):
         print('Symbol: ', self.symbol)
         print('Account ID: ', self.account_id)
-        print('Num. of shares of symbol: ', self.number)
+        print('Num. of shares of symbol: ', self.amount)
             
         return ''
 
@@ -157,16 +157,17 @@ def parse_xml(recv_string):
                 sym=child.attrib.get('sym')
 
                 for grandchild in child:
-                    position_acc_id=grandchild.attrib.get('id')
+                    position_account_id=grandchild.attrib.get('id')
                     num=grandchild.text
                     pass
 
-                pos = Position(sym, position_acc_id, num)
+                pos = Position(sym, position_account_id, num)
                 #create_obj.position.append(pos)
                 create_obj.sequence.append(pos)
                 pass
             pass
-        print(create_obj)
+        #print(create_obj)
+        return create_obj
                 
         # for account in create_obj.account:
         #     print(account.id, account.balance)
@@ -203,7 +204,8 @@ def parse_xml(recv_string):
                 pass
             pass
 
-        print(transaction_obj)
+        #print(transaction_obj)
+        return transaction_obj
 
     #     print("Transaction_Obj ID: ", transaction_obj.id)
     #     for order in transaction_obj.order:
