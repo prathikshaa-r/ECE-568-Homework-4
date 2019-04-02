@@ -37,7 +37,7 @@ class Position:
     def __init__(self, symbol, acc_id, number):
         self.symbol = symbol
         self.account_id = acc_id #the array of Account objects, should be string
-        self.number = number # no. of shares of the symbol to be added to the account
+        self.amount = amount # no. of shares of the symbol to be added to the account
         self.type = 'position'
         self.created = True ##True means created succuss, FALSE means error; True as default
         self.err = ""

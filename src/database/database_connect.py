@@ -151,41 +151,75 @@ def create_order(conn, trans_id, symbol, amount, limit_price, account_id):
         buy = False
         pass
 
-    '''
-    Buy Order
-    Reduce balance in Accounts
-    '''
-    if buy is true:
-        try:
-            cur = conn.cursor()
-            cur.execute('''SELECT balance FROM Accounts WHERE accoutn_id = %s''', (account_id,))
-            row = cur.fetchone()
-            balance = row[0]
-            share_price = limit_price * amount
-            if balance < share_price:
-                # Insufficient funds error
-                return
-            cur.execute('''UPDATE Accounts SET balance = balance-%s WHERE accoutn_id = %s''', (share_price,account_id))
-            cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (trans_id, symbol, amount, limit_price, account_id))
-            conn.commit()
+    # """
+    # Buy Order
+    # Reduce balance in Accounts
+    # """
+    if buy is True:
+        create_buy_order(conn, trans_id, symbol, amount, limit_price, account_id)
+    # """
+    # Sell Order
+    # Reduce amount in positions
+    # """
 
-        except psycopg2.IntegrityError:
-            raise
-        except:
-            print ('Failed to create buy order', sys.exc_info())
-            pass
-        conn.commit()
-        pass
-    
-    '''
-    Sell Order
-    Reduce amount in positions
-    '''
     else:
-        try:
-            cur = conn.curson()
-            cur.execute('''SELECT COUNT(*) FROM Positons 
-            WHERE symbol = %s''')
-            
-    
-    
+        create_sell_order(conn, trans_id, symbol, amount, limit_price, account_id)
+        pass
+    pass
+        
+def create_buy_order(conn, trans_id, symbol, amount, limit_price, account_id):
+    try:
+        cur = conn.cursor()
+    # read-modify-write start
+    # lock(Accounts)
+        cur.execute('''SELECT balance FROM Accounts WHERE accoutn_id = %s''', (account_id,))
+        row = cur.fetchone()
+        balance = row[0]
+        share_price = limit_price * amount
+        if balance < share_price:
+            # Insufficient funds error
+            return
+        cur.execute('''UPDATE Accounts SET balance = balance-%s WHERE accoutn_id = %s''', (share_price,account_id))
+        cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (trans_id, symbol, amount, limit_price, account_id))
+    # unlock(Accounts)
+    # read-modify-write end
+        conn.commit()
+
+    except psycopg2.IntegrityError:
+        raise
+    except:
+        print ('Failed to create buy order', sys.exc_info())
+        pass
+    conn.commit()
+    return conn
+
+def create_sell_order(conn, trans_id, symbol, amount, limit_price, account_id):
+    try:
+        cur = conn.curson()
+    # read-modify-write start
+    # lock(Positions)
+        cur.execute('''SELECT COUNT(*) FROM Positons 
+        WHERE symbol = %s AND account_id = %s AND amount > (-%s)''', (symbol, account_id, amount))
+        row = cur.fetchone()
+        position_count = row[0]
+        if position_count != 1:
+            # Insufficient Shares to sell error
+            printf("Insufficient shares to sell")
+            return
+        cur.execute('''UPDATE Postions SET amount = amount + %s 
+        WHERE account_id = %s AND symbol = %s''', (amount, account_id, symbol))
+    # unlock(Postions)
+    # read-modify-write end
+        conn.commit()
+
+    except psycopg2.IntegrityError:
+        raise
+    except:
+        print('Failed to create sell order', sys.exc_info())
+        pass
+    conn.commit()
+    pass
+    return conn
+
+def test_connect():
+    return
