@@ -8,18 +8,25 @@ from xml_parser_header import parse_xml
 from database_connect import *
 from database_setup import *
 
+def recvall(sock,total_msg_len):
+    msg = b''
+    while(len(msg)) < total_msg_len:
+        part = sock.recv(total_msg_len-len(msg))
+        if part == b'':
+            #raise RuntimeError("recv: socket connection closed")                                                            
+            break
+        msg = msg + part
+        pass
+    return msg
+pass
+
 
 def process_request(connection, client_address):
     try:
         print('connection from', client_address)
         # Receive the data in small chunks and retransmit it
-        recv_string=""
-        while True:
-            data = connection.recv(1024)
-            if data:
-                recv_string += data.decode("utf-8")
-            else:
-                break
+        length=recvall(connection,28)
+        recv_string=recvall(connection,int.from_bytes(length, byteorder='big'))
         obj=parse_xml(recv_string)
         for sub in obj.sequence:
             if sub.type=='account':
