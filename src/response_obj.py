@@ -2,7 +2,7 @@ class Order_resp:
     def __init__(self,order,open,msg,id):
         self.sym = order.sym
         self.amount = order.amount
-        self.limit = order.limit
+        self.limit = order.limit_price
         self.type ="order"
         self.open = open #boolean
         self.msg = msg

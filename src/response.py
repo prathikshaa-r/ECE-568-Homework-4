@@ -9,16 +9,16 @@ def create_response(create):#create=Create_obj()
     top=Element('results')
     for child in create.sequence:
         if child.type=='account':
-            if child.create:
-                attributes={"id":child.id}
+            if child.created:
+                attributes={"id":child.account_id}
                 node=SubElement(top,'created',attributes)
             else:
-                attributes={"id":child.id}
+                attributes={"id":child.account_id}
                 node=SubElement(top,'error',attributes)
                 node.text=child.msg
         
         elif child.type=='position':
-            if child.create:
+            if child.created:
                 attributes={"sym":child.symbol,"id":child.account_id}
                 node=SubElement(top,'created',attributes)
             else:
@@ -84,6 +84,7 @@ create_response(create)
 """
 transaction_response() test
 """
+
 """
 order1=Order('DUKE','3000','4000')
 Order1=Order_resp(order1,True,'open','1')
@@ -105,8 +106,8 @@ response.append(Order2)
 response.append(tr1)
 response.append(tr2)
 transaction_response(response)
-
 """
+
 
 
 
