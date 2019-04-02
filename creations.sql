@@ -15,6 +15,19 @@ UPDATE positions SET amount=amount+139.22 WHERE symbol ='aa' AND account_id = 12
 
 /* creatre orders */
 /*todo: deduct money from account */
+/* Sell  -- amount < 0 */
+SELECT COUNT(*) FROM Positions 
+WHERE symbol = '' AND account_id = '' AND amount > (-138.33)
+
+UPDATE Positions SET amount = amount-138.33 WHERE account_id = 12 AND symbol ='aa'
+
+/* Buy -- amount > 0 */
+SELECT balance FROM Accounts WHERE account_id = 12
+/*if(balance) >= limit_price*amount  */
+UPDATE Accounts SET balance = balance - (limit_price*amount)
+ WHERE account_id = 12
+
+ /*------------------------------------------------------*/
 
 INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id)
 VALUES (5, 'aa', -200, 140, 12);
