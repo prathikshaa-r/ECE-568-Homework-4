@@ -79,6 +79,8 @@ class Order:
         self.amount = amount
         self.limit_price = limit_price
         self.type = 'order'
+        self.success = True
+        self.err = ""
 
     """
     print function
@@ -96,6 +98,8 @@ class Query:
     def __init__(self, id):
         self.id = id
         self.type = 'query'
+        self.success = True
+        self.err = ""
 
     """
     print function
@@ -109,6 +113,8 @@ class Cancel:
     def __init__(self, id):
         self.id = id
         self.type = 'cancel'
+        self.success = True
+        self.err = ""
 
     """
     print function
