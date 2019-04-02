@@ -155,12 +155,12 @@ def test_position_creation():
            
 #-----------------------------------------Transactions-----------------------------------------#
 
-def create_order(conn, trans_id, symbol, amount, limit_price, account_id):
+def create_order(conn, order, account_id):
     # type checking inputs
     try:
-        amount_float = float(amount)
+        amount_float = float(order.amount)
         account_id_int = int(account_id)
-        limit_price_float = float(limite_price)
+        limit_price_float = float(order.limit_price)
     except: # ValueError
         raise
 
@@ -174,18 +174,18 @@ def create_order(conn, trans_id, symbol, amount, limit_price, account_id):
     # Reduce balance in Accounts
     # """
     if buy is True:
-        create_buy_order(conn, trans_id, symbol, amount, limit_price, account_id)
+        create_buy_order(conn, order, account_id)
     # """
     # Sell Order
     # Reduce amount in positions
     # """
 
     else:
-        create_sell_order(conn, trans_id, symbol, amount, limit_price, account_id)
+        create_sell_order(conn, order, account_id)
         pass
     pass
         
-def create_buy_order(conn, trans_id, symbol, amount, limit_price, account_id):
+def create_buy_order(conn, order, account_id):
     try:
         cur = conn.cursor()
     # read-modify-write start
@@ -193,12 +193,12 @@ def create_buy_order(conn, trans_id, symbol, amount, limit_price, account_id):
         cur.execute('''SELECT balance FROM Accounts WHERE accoutn_id = %s''', (account_id,))
         row = cur.fetchone()
         balance = row[0]
-        share_price = limit_price * amount
+        share_price = order.limit_price * order.amount
         if balance < share_price:
             # Insufficient funds error
             return
-        cur.execute('''UPDATE Accounts SET balance = balance-%s WHERE accoutn_id = %s''', (share_price,account_id))
-        cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (trans_id, symbol, amount, limit_price, account_id))
+        cur.execute('''UPDATE Accounts SET balance = balance-%s WHERE accoutn_id = %s''', (share_price, account_id))
+        cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (order.trans_id, order.symbol, order.amount, order.limit_price, account_id))
     # unlock(Accounts)
     # read-modify-write end
         conn.commit()
@@ -211,13 +211,13 @@ def create_buy_order(conn, trans_id, symbol, amount, limit_price, account_id):
     conn.commit()
     return conn
 
-def create_sell_order(conn, trans_id, symbol, amount, limit_price, account_id):
+def create_sell_order(conn, order, account_id):
     try:
         cur = conn.curson()
     # read-modify-write start
     # lock(Positions)
         cur.execute('''SELECT COUNT(*) FROM Positons 
-        WHERE symbol = %s AND account_id = %s AND amount > (-%s)''', (symbol, account_id, amount))
+        WHERE symbol = %s AND account_id = %s AND amount > (-%s)''', (order.symbol, account_id, order.amount))
         row = cur.fetchone()
         position_count = row[0]
         if position_count != 1:
@@ -225,7 +225,9 @@ def create_sell_order(conn, trans_id, symbol, amount, limit_price, account_id):
             printf("Insufficient shares to sell")
             return
         cur.execute('''UPDATE Postions SET amount = amount + %s 
-        WHERE account_id = %s AND symbol = %s''', (amount, account_id, symbol))
+       WHERE account_id = %s AND symbol = %s''', (order.amount, account_id, order.symbol))
+        cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (order.trans_id, order.symbol, order.amount, order.limit_price, account_id))
+
     # unlock(Postions)
     # read-modify-write end
         conn.commit()
@@ -239,5 +241,6 @@ def create_sell_order(conn, trans_id, symbol, amount, limit_price, account_id):
     pass
     return conn
 
-def test_connect():
+def test_order():
+    order = Order("aa", )
     return
