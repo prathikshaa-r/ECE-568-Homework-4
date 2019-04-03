@@ -281,14 +281,14 @@ def test_order():
 # test_order()
 
 def query_order(conn, query_obj):
+    query_resp = TransactionResponse(query_obj.trans_id, 'query')
+
     try:
         trans_id = int(query_obj.trans_id)
     except:
         query_resp.success = False
         query_resp.err = 'Invalid format of transaction id'
-        pass
-
-    query_resp = TransactionResponse(trans_id, 'query')
+        return query_resp
 
     try:
         cur = conn.cursor()
@@ -318,7 +318,7 @@ def query_order(conn, query_obj):
     return query_resp
 
 def test_query():
-    query_obj = Query(13)
+    query_obj = Query('asd')
     resp = query_order(connect(), query_obj)
     # for row in resp.trans_resp:
     #     print(row)
