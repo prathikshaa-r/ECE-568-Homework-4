@@ -4,6 +4,15 @@ class TransactionSubResponse:
         self.shares = shares
         self.price = price
         self.time = time
+        pass
+
+    # print Transaction Sub Response
+    def __repr__(self):
+        print('Status: ' + self.status)
+        print('Amount of shares: ', self.shares)
+        print('Price: ', self.price)
+        print('Time: ', self.time)
+        return ''
 
 class TransactionResponse:
     def __init__(self, trans_id, type):

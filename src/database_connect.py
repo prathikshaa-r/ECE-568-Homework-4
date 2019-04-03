@@ -294,13 +294,18 @@ def query_order(conn, query_obj):
         cur = conn.cursor()
         cur.execute('''SELECT status, amount, limit_price FROM Orders WHERE trans_id = %s;''', (trans_id,))
         rows = cur.fetchall()
+        if not rows:
+            query_resp.success = False
+            query_resp.err = 'No orders found with given transaction id'
+            return query_resp
+        
         for row in rows:
             resp = TransactionSubResponse(row[0], row[1], row[2], 'random_time')
-            query_resp.append(resp)
+            query_resp.trans_resp.append(resp)
     except psycopg2.IntegrityError:
         # raise
         query_resp.success = False
-        query_resp.err = "Database Error: Invalid account or symbol or combination thereof " + sys.exc_info()
+        query_resp.err = "Database Error" + sys.exc_info()
         pass
     
     except:
@@ -313,12 +318,16 @@ def query_order(conn, query_obj):
     return query_resp
 
 def test_query():
-    query_obj = Query(1)
+    query_obj = Query(13)
     resp = query_order(connect(), query_obj)
-    for row in resp:
+    for row in resp.trans_resp:
         print(row)
         pass
-    pass
+
+    if not resp.success:
+        print(resp.err)
+        pass
+    
 
 test_query()
 
