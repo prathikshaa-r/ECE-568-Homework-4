@@ -20,6 +20,6 @@ CREATE TABLE Orders (
 	amount real NOT NULL, /* +ve or -ve real number -ve=>sell */
 	limit_price real NOT NULL, /* positive real number */
 	account_id int NOT NULL,
-	status order_status NOT NULL,
+	status order_status NOT NULL DEFAULT 'open',
 	FOREIGN KEY(account_id) REFERENCES Accounts(account_id) ON DELETE CASCADE /* ideally on delete set status to cancelled */
 );
