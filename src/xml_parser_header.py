@@ -74,12 +74,14 @@ classes for Transaction_obj
 """
         
 class Order:
-    def __init__(self, sym, amount, limit_price):
-        self.sym = sym
+    def __init__(self, symbol, amount, limit_price):
+        self.trans_id = 0
+        self.symbol = symbol
         self.amount = amount
         self.limit_price = limit_price
         self.type = 'order'
         self.success = True
+        self.status = 'open' # open , executed, cancelled
         self.err = ""
 
     """
@@ -88,15 +90,15 @@ class Order:
     def __repr__(self):
 
         print('Order:')
-        print('Symbol: ', self.sym)
+        print('Symbol: ', self.symbol)
         print('Amount: ', self.amount)
         print('Limit: ', self.limit_price)
 
         return ''
         
 class Query:
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, trans_id):
+        self.trans_id = trans_id
         self.type = 'query'
         self.success = True
         self.err = ""
@@ -105,13 +107,13 @@ class Query:
     print function
     """        
     def __repr__(self):
-        print('Query ID: ', self.id)
+        print('Query ID: ', self.trans_id)
         return ''
 
         
 class Cancel:
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, trans_id):
+        self.trans_id = trans_id
         self.type = 'cancel'
         self.success = True
         self.err = ""
@@ -120,13 +122,13 @@ class Cancel:
     print function
     """        
     def __repr__(self):
-        print('Cancel ID: ', self.id)
+        print('Cancel ID: ', self.trans_id)
         return ''
 
         
 class Transaction_obj:
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, account_id):
+        self.account_id = account_id
         self.sequence = []
 
     """
@@ -160,14 +162,14 @@ def parse_xml(recv_string):
                 pass
 
             elif child.tag=='symbol':
-                sym=child.attrib.get('sym')
+                symbol=child.attrib.get('sym')
 
                 for grandchild in child:
                     position_account_id=grandchild.attrib.get('id')
                     num=grandchild.text
                     pass
 
-                pos = Position(sym, position_account_id, num)
+                pos = Position(symbol, position_account_id, num)
                 #create_obj.position.append(pos)
                 create_obj.sequence.append(pos)
                 pass
@@ -179,18 +181,18 @@ def parse_xml(recv_string):
         #     print(account.id, account.balance)
 
         # for symbol in create_obj.symbol:
-        #     print(symbol.sym)
+        #     print(symbol.symbol)
         #     for account in symbol.account:
         #         print(account.id, account.balance)
         pass
 
     #process transaction object here
     if root.tag=='transactions':
-        id1=root.attrib.get('id')
-        transaction_obj=Transaction_obj(id1)
+        account_id=root.attrib.get('id')
+        transaction_obj=Transaction_obj(account_id)
         for child in root:
             if child.tag=='order':
-                symbol=child.attrib.get('sym')
+                symbol=child.attrib.get('symbol')
                 amount=child.attrib.get('amount')
                 limit = child.attrib.get('limit')
                 order=Order(symbol,amount,limit)
@@ -198,14 +200,14 @@ def parse_xml(recv_string):
                 pass
 
             elif child.tag=='query':
-                id2 = child.attrib.get('id')
-                query=Query(id2)
+                trans_id = child.attrib.get('id')
+                query=Query(trans_id)
                 transaction_obj.sequence.append(query)
                 pass
 
             elif child.tag=='cancel':
-                id2 = child.attrib.get('id')
-                cancel=Cancel(id2)
+                trans_id = child.attrib.get('id')
+                cancel=Cancel(trans_id)
                 transaction_obj.sequence.append(cancel)
                 pass
             pass
@@ -215,7 +217,7 @@ def parse_xml(recv_string):
 
     #     print("Transaction_Obj ID: ", transaction_obj.id)
     #     for order in transaction_obj.order:
-    #         print(order.sym,order.amount,order.limit)
+    #         print(order.symbol,order.amount,order.limit)
     #     for query in transaction_obj.query:
     #         print(query.id)
     #     for cancel in transaction_obj.cancel:
