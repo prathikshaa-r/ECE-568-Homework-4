@@ -331,6 +331,56 @@ def test_query():
 
 test_query()
 
-def cancel_order(trans_id):
-    trans_id = int(query_obj.trans_id)
-    return
+def cancel_order(conn, cancel_obj):
+    cancel_resp = TransactionResponse(cancel_obj.trans_id, 'cancel')
+
+    try:
+        trans_id = int(cancel_obj.trans_id)
+    except:
+        cancel_resp.success = False
+        cancel_resp.err = 'Invalid format of transaction id'
+        return cancel_resp
+
+    try:
+        cur = conn.cursor()
+
+        cur.execute('''UPDATE Orders SET Status='cancelled' WHERE trans_id=%s AND Status = 'open' ''', (trans_id,))
+        
+        cur.execute('''SELECT status, amount, limit_price FROM Orders WHERE trans_id = %s;''', (trans_id,))
+        rows = cur.fetchall()
+        if not rows:
+            cancel_resp.success = False
+            cancel_resp.err = 'No orders found with given transaction id'
+            return cancel_resp
+        
+        for row in rows:
+            resp = TransactionSubResponse(row[0], row[1], row[2], 'random_time')
+            cancel_resp.trans_resp.append(resp)
+    except psycopg2.IntegrityError:
+        # raise
+        cancel_resp.success = False
+        cancel_resp.err = "Database Error" + sys.exc_info()
+        pass
+    
+    except:
+        cancel_resp.success = False
+        cancel_resp.err = "Failed to cancel transaction ID " + sys.exc_info()
+        pass
+
+    conn.commit()
+    pass
+    return cancel_resp
+
+def test_cancel():
+    cancel_obj = Cancel(1)
+    resp = cancel_order(connect(), cancel_obj)
+    # for row in resp.trans_resp:
+    #     print(row)
+    #     pass
+
+    # if not resp.success:
+    #     print(resp.err)
+    #     pass
+    print(resp)
+
+test_cancel()
