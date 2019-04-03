@@ -57,6 +57,9 @@ def process_request(connection, client_address):
                 print(new_obj)
                 print("Error:")
                 print(new_obj.err)
+            if sub.type == 'query':
+                new_obj = query_order(connect(), sub)
+                print(new_obj)
 
 
     finally:
