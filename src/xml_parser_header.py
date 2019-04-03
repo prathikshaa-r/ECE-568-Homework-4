@@ -75,8 +75,8 @@ classes for Transaction_obj
 """
         
 class Order:
-    def __init__(self, symbol, amount, limit_price, id):
-        self.trans_id = id
+    def __init__(self, symbol, amount, limit_price, trans_id):
+        self.trans_id = trans_id
         self.symbol = symbol
         self.amount = amount
         self.limit_price = limit_price
@@ -139,13 +139,10 @@ class Transaction_obj:
             
         return ''
 
-# todo: convert below to a function
-# xml_parser("file.xml")
-
 def parse_xml(recv_string):
-    #tree = ET.parse(file_path)
-    #root = tree.getroot()
+
     root=ET.fromstring(recv_string)
+
     #process create object here
     if root.tag=='create':
         create_obj=Create_obj()
@@ -154,7 +151,6 @@ def parse_xml(recv_string):
                 id1=child.attrib.get('id')
                 balance=child.attrib.get('balance')
                 account=Account(id1,balance)
-                #create_obj.account.append(account)
                 create_obj.sequence.append(account)
                 pass
 
@@ -167,11 +163,9 @@ def parse_xml(recv_string):
                     pass
 
                 pos = Position(symbol, position_account_id, num)
-                #create_obj.position.append(pos)
                 create_obj.sequence.append(pos)
                 pass
             pass
-        #print(create_obj)
         return create_obj
                 
         # for account in create_obj.account:
@@ -210,7 +204,6 @@ def parse_xml(recv_string):
                 pass
             pass
 
-        #print(transaction_obj)
         return transaction_obj
 
     #     print("Transaction_Obj ID: ", transaction_obj.id)

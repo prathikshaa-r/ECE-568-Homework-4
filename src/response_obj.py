@@ -1,12 +1,12 @@
 class TransactionSubResponse:
     def __init__(self, status, shares, price, time):
-        self.status=status
-        self.shares=shares
-        self.price=price
-        self.time=time
+        self.status = status
+        self.shares = shares
+        self.price = price
+        self.time = time
 
 class TransactionResponse:
-    def __init__(self,trans_id,request):
+    def __init__(self, trans_id,request):
         self.trans_id=trans_id
         self.type="transac"
         self.request=request # query or cancel

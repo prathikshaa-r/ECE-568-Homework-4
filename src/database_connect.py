@@ -175,7 +175,7 @@ def create_order(conn, order, account_id, trans_id):
     # """
     if buy is True:
         print('is a buy order')
-        order = create_buy_order(conn, order, account_id, trans_id)
+        order = create_buy_order(conn, order, account_id, order.trans_id)
     # """
     # Sell Order
     # Reduce amount in positions
@@ -183,13 +183,13 @@ def create_order(conn, order, account_id, trans_id):
 
     else:
         print('is a sell order')
-        order = create_sell_order(conn, order, account_id, trans_id)
+        order = create_sell_order(conn, order, account_id, order.trans_id)
         pass
 
     # match_order(order)
     return order
         
-def create_buy_order(conn, order, account_id, trans_id):
+def create_buy_order(conn, order, account_id):
     try:
         cur = conn.cursor()
     # read-modify-write start
@@ -205,7 +205,7 @@ def create_buy_order(conn, order, account_id, trans_id):
             return
         
         cur.execute('''UPDATE Accounts SET balance = balance-%s WHERE account_id = %s''', (share_price, account_id))
-        cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (trans_id, order.symbol, order.amount, order.limit_price, account_id))
+        cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (order.trans_id, order.symbol, order.amount, order.limit_price, account_id))
     # unlock(Accounts)
     # read-modify-write end
         conn.commit()
@@ -223,7 +223,7 @@ def create_buy_order(conn, order, account_id, trans_id):
     conn.commit()
     return order
 
-def create_sell_order(conn, order, account_id, trans_id):
+def create_sell_order(conn, order, account_id):
     try:
         cur = conn.cursor()
     # read-modify-write start
@@ -239,7 +239,7 @@ def create_sell_order(conn, order, account_id, trans_id):
             return
         cur.execute('''UPDATE Positions SET amount = amount + %s 
        WHERE account_id = %s AND symbol = %s''', (order.amount, account_id, order.symbol))
-        cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (trans_id, order.symbol, order.amount, order.limit_price, account_id))
+        cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (order.trans_id, order.symbol, order.amount, order.limit_price, account_id))
 
     # unlock(Postions)
     # read-modify-write end
