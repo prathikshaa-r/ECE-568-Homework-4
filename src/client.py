@@ -3,6 +3,37 @@ import socket
 import sys
 import os
 
+import random, string
+from xml.etree.ElementTree import Element, SubElement
+from ElementTree_pretty import prettify
+
+def randomword(length):
+   letters = string.ascii_uppercase
+   return ''.join(random.choice(letters) for i in range(length))
+
+def create_request():
+    top=Element('create')
+    attributes1={"id":str(random.randint(1,10001)),"balance":str(random.randint(1,10001))}
+    SubElement(top, 'account', attributes1)
+    attributes2={"sym":randomword(3)}
+    node=SubElement(top,'symbol',attributes2)
+    attributes3={"id":str(random.randint(1,10001))}
+    node1=SubElement(node,'account',attributes3)
+    node1.text=str(random.randint(1,10001))
+    return prettify(top)
+
+def transaction_request():
+    top=Element('transactions')
+    attributes1={'id':str(random.randint(1,10001))}
+    top.attrib=attributes1
+    attributes2={'sym':randomword(3),'amount':str(random.randint(-10000,10001)),'limit':str(random.randint(1,10001))}
+    SubElement(top,'order',attributes2)
+    attributes3={'id':str(random.randint(1,10001))}
+    SubElement(top,'query',attributes3)
+    attributes4={'id':str(random.randint(1,10001))}
+    SubElement(top,'cancel',{'id':str(random.randint(1,10001))})
+    print(prettify(top))
+
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -16,27 +47,21 @@ sock.connect(server_address)
     # Send data
     #message = b'This is the message.  It will be repeated.'
     #print('sending {!r}'.format(message))
-filename = 'country_data.xml'
-length=os.path.getsize(filename)
+
+# filename = 'create.xml'
+# length=os.path.getsize(filename)
+# sock.send(length.to_bytes(28,'big'))
+# f = open(filename, 'rb')
+# l = f.read(1024)
+# while(l):
+#     sock.send(l)
+#     l = f.read(1024)
+# f.close()
+sent=create_request()
+length=len(sent)
 sock.send(length.to_bytes(28,'big'))
-f = open(filename, 'rb')
-l = f.read(1024)
-while(l):
-    sock.send(l)
-    l = f.read(1024)
-f.close()
-#sock.sendall(message)
+sock.send(sent.encode())
 
-# Look for the response
-"""
-    amount_received = 0
-    amount_expected = len(message)
-
-    while amount_received < amount_expected:
-        data = sock.recv(16)
-        amount_received += len(data)
-        print('received {!r}'.format(data))
-    """
 
 # finally:
 #     print('closing socket')

@@ -8,6 +8,7 @@ from xml_parser_header import parse_xml
 from database_connect import *
 from database_setup import *
 
+
 def recvall(sock,total_msg_len):
     msg = b''
     while(len(msg)) < total_msg_len:
