@@ -237,7 +237,7 @@ def create_sell_order(conn, order, account_id):
             # Insufficient Shares to sell error
             order.success = False
             order.err = 'Insufficient shares to sell'
-            return
+            return order
         cur.execute('''UPDATE Positions SET amount = amount + %s 
        WHERE account_id = %s AND symbol = %s''', (order.amount, account_id, order.symbol))
         cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (order.trans_id, order.symbol, order.amount, order.limit_price, account_id))
