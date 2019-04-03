@@ -203,7 +203,7 @@ def create_buy_order(conn, order, account_id):
             # Insufficient funds error
             order.success = False
             order.err = 'Insufficient Funds'
-            return
+            return order
         
         cur.execute('''UPDATE Accounts SET balance = balance-%s WHERE account_id = %s''', (share_price, account_id))
         cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (order.trans_id, order.symbol, order.amount, order.limit_price, account_id))
