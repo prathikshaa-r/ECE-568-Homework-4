@@ -6,10 +6,10 @@ class TransactionSubResponse:
         self.time = time
 
 class TransactionResponse:
-    def __init__(self, trans_id,request):
-        self.trans_id=trans_id
-        self.type=request # query or cancel
-        self.trans_resp=[] #the array of Sub_Response objects
+    def __init__(self, trans_id, type):
+        self.trans_id = trans_id
+        self.type = type # query or cancel
+        self.trans_resp = [] #the array of Sub_Response objects
 
 #Response=[]
 #contains Order_resp and TransactionResponse
