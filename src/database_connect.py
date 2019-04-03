@@ -280,13 +280,15 @@ def test_order():
 # test_order()
 
 def query_order(conn, query_obj):
-    query_resp = TransactionResponse()
     try:
         trans_id = int(query_obj.trans_id)
     except:
         query_resp.success = False
         query_resp.err = 'Invalid format of transaction id'
         pass
+
+    query_resp = TransactionResponse(trans_id, 'query')
+
     try:
         cur = conn.cursor()
         cur.execute('''SELECT status, amount, limit_price FROM Orders WHERE trans_id = %s;''', (trans_id,))
@@ -310,6 +312,11 @@ def query_order(conn, query_obj):
     pass
     return query_resp
 
+def test_query():
+    query_obj = Query(1)
+    resp = query_order(conn(), query_obj)
+    for row in resp.
+                       
 
 def cancel_order(trans_id):
     trans_id = int(query_obj.trans_id)
