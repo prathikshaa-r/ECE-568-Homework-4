@@ -8,8 +8,7 @@ class TransactionSubResponse:
 class TransactionResponse:
     def __init__(self, trans_id,request):
         self.trans_id=trans_id
-        self.type="transac"
-        self.request=request # query or cancel
+        self.type=request # query or cancel
         self.trans_resp=[] #the array of Sub_Response objects
 
 #Response=[]

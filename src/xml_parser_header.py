@@ -10,7 +10,7 @@ _maintainer_ = "Prathikshaa Rangarajan"
 
 import xml.etree.ElementTree as ET
 
-order_id=1
+
 
 """
 classes for Create_obj
@@ -139,67 +139,49 @@ class Transaction_obj:
             
         return ''
 
-def parse_xml(recv_string):
-
+def parse_xml(recv_string,order_id):
     root=ET.fromstring(recv_string)
-
     #process create object here
     if root.tag=='create':
         create_obj=Create_obj()
         for child in root:
             if child.tag=='account':
-                id1=child.attrib.get('id')
-                balance=child.attrib.get('balance')
+                id1=int(child.attrib.get('id'))
+                balance=float(child.attrib.get('balance'))
                 account=Account(id1,balance)
                 create_obj.sequence.append(account)
-                pass
-
             elif child.tag=='symbol':
                 symbol=child.attrib.get('sym')
-
                 for grandchild in child:
                     position_account_id=grandchild.attrib.get('id')
                     num=grandchild.text
-                    pass
-
-                pos = Position(symbol, position_account_id, num)
-                create_obj.sequence.append(pos)
-                pass
-            pass
+                    pos = Position(symbol, int(position_account_id), float(num))
+                    create_obj.sequence.append(pos)
         return create_obj
-                
-        # for account in create_obj.account:
-        #     print(account.id, account.balance)
-
-        # for symbol in create_obj.symbol:
-        #     print(symbol.symbol)
-        #     for account in symbol.account:
-        #         print(account.id, account.balance)
-        pass
 
     #process transaction object here
     if root.tag=='transactions':
         account_id=root.attrib.get('id')
-        transaction_obj=Transaction_obj(account_id)
+        transaction_obj=Transaction_obj(int(account_id))
         for child in root:
             if child.tag=='order':
-                symbol=child.attrib.get('symbol')
+                symbol=child.attrib.get('sym')
                 amount=child.attrib.get('amount')
                 limit = child.attrib.get('limit')
-                order=Order(symbol,amount,limit,order_id)
+                order=Order(symbol,float(amount),float(limit),order_id)
                 order_id=order_id+1
                 transaction_obj.sequence.append(order)
                 pass
 
             elif child.tag=='query':
                 trans_id = child.attrib.get('id')
-                query=Query(trans_id)
+                query=Query(int(trans_id))
                 transaction_obj.sequence.append(query)
                 pass
 
             elif child.tag=='cancel':
                 trans_id = child.attrib.get('id')
-                cancel=Cancel(trans_id)
+                cancel=Cancel(int(trans_id))
                 transaction_obj.sequence.append(cancel)
                 pass
             pass

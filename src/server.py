@@ -21,7 +21,7 @@ def recvall(sock,total_msg_len):
     return msg
 pass
 
-
+order_id=1
 
 def process_request(connection, client_address):
     try:
@@ -29,7 +29,7 @@ def process_request(connection, client_address):
         # Receive the data in small chunks and retransmit it
         length=recvall(connection,28)
         recv_string=recvall(connection,int.from_bytes(length, byteorder='big'))
-        obj=parse_xml(recv_string)
+        obj=parse_xml(recv_string,order_id)
         # for sub in obj.sequence:
         #     if sub.type=='account':
         #         obj = create_account(connect(),sub)
@@ -43,15 +43,21 @@ def process_request(connection, client_address):
         #         print(obj.err)
         for sub in obj.sequence:
             if sub.type=='account':
-                obj = create_account(connect(),sub)
-                print(obj)
+                new_obj = create_account(connect(),sub)
+                print(new_obj)
                 print("Error:")
-                print(obj.err)
+                print(new_obj.err)
             if sub.type=='position':
-                obj = create_position(connect(),sub)
-                print(obj)
+                new_obj = create_position(connect(),sub)
+                print(new_obj)
                 print("Error:")
-                print(obj.err)
+                print(new_obj.err)
+            if sub.type=='order':
+                new_obj= create_order(connect(),sub,obj.account_id)
+                print(new_obj)
+                print("Error:")
+                print(new_obj.err)
+
 
     finally:
         # Clean up the connection

@@ -218,7 +218,7 @@ def create_buy_order(conn, order, account_id):
     except:
         # print ('Failed to create buy order', sys.exc_info())
         order.success = False
-        order.err = 'Failed to create order ' + sys.exc_info()
+        order.err = 'Failed to create order ' 
         pass
     conn.commit()
     return order

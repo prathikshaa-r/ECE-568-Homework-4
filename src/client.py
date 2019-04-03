@@ -28,11 +28,11 @@ def transaction_request():
     top.attrib=attributes1
     attributes2={'sym':randomword(3),'amount':str(random.randint(-10000,10001)),'limit':str(random.randint(1,10001))}
     SubElement(top,'order',attributes2)
-    attributes3={'id':str(random.randint(1,10001))}
-    SubElement(top,'query',attributes3)
-    attributes4={'id':str(random.randint(1,10001))}
-    SubElement(top,'cancel',{'id':str(random.randint(1,10001))})
-    print(prettify(top))
+    # attributes3={'id':str(random.randint(1,10001))}
+    # SubElement(top,'query',attributes3)
+    # attributes4={'id':str(random.randint(1,10001))}
+    # SubElement(top,'cancel',attributes4)
+    return prettify(top)
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -57,7 +57,7 @@ sock.connect(server_address)
 #     sock.send(l)
 #     l = f.read(1024)
 # f.close()
-sent=create_request()
+sent=transaction_request()
 length=len(sent)
 sock.send(length.to_bytes(28,'big'))
 sock.send(sent.encode())
