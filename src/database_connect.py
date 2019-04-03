@@ -314,9 +314,13 @@ def query_order(conn, query_obj):
 
 def test_query():
     query_obj = Query(1)
-    resp = query_order(conn(), query_obj)
-    for row in resp.
-                       
+    resp = query_order(connect(), query_obj)
+    for row in resp:
+        print(row)
+        pass
+    pass
+
+test_query()
 
 def cancel_order(trans_id):
     trans_id = int(query_obj.trans_id)
