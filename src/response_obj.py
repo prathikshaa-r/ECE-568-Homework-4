@@ -10,6 +10,8 @@ class TransactionResponse:
         self.trans_id = trans_id
         self.type = type # query or cancel
         self.trans_resp = [] #the array of Sub_Response objects
-
+        self.success = True
+        self.err = ""
+        
 #Response=[]
 #contains Order_resp and TransactionResponse

@@ -10,6 +10,7 @@ import psycopg2
 import sys
 
 from xml_parser_header import *
+from response_obj import *
 
 # sys.path.append('..')
 # import parser.xml_parser_header
@@ -298,14 +299,13 @@ def query_order(conn, query_obj):
             query_resp.append(resp)
     except psycopg2.IntegrityError:
         # raise
-        order.success = False
-        order.err = "Database Error: Invalid account or symbol or combination thereof " + sys.exc_info()
+        query_resp.success = False
+        query_resp.err = "Database Error: Invalid account or symbol or combination thereof " + sys.exc_info()
         pass
     
     except:
-        # print('Failed to create sell order', sys.exc_info())
-        order.success = False
-        order.err = "Failed to create order " + sys.exc_info()
+        query_resp.success = False
+        query_resp.err = "Failed to query transaction ID " + sys.exc_info()
         pass
 
     conn.commit()
