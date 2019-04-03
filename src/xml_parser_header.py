@@ -10,6 +10,7 @@ _maintainer_ = "Prathikshaa Rangarajan"
 
 import xml.etree.ElementTree as ET
 
+order_id=1
 
 """
 classes for Create_obj
@@ -74,8 +75,8 @@ classes for Transaction_obj
 """
         
 class Order:
-    def __init__(self, symbol, amount, limit_price):
-        self.trans_id = 0
+    def __init__(self, symbol, amount, limit_price, id):
+        self.trans_id = id
         self.symbol = symbol
         self.amount = amount
         self.limit_price = limit_price
@@ -195,7 +196,8 @@ def parse_xml(recv_string):
                 symbol=child.attrib.get('symbol')
                 amount=child.attrib.get('amount')
                 limit = child.attrib.get('limit')
-                order=Order(symbol,amount,limit)
+                order=Order(symbol,amount,limit,order_id)
+                order_id=order_id+1
                 transaction_obj.sequence.append(order)
                 pass
 

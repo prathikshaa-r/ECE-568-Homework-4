@@ -61,6 +61,7 @@ sent=create_request()
 length=len(sent)
 sock.send(length.to_bytes(28,'big'))
 sock.send(sent.encode())
+print(sock.recv(2048))
 
 
 # finally:
