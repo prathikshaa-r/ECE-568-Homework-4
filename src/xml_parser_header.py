@@ -169,7 +169,7 @@ def parse_xml(recv_string,order_id):
                 amount=child.attrib.get('amount')
                 limit = child.attrib.get('limit')
                 order=Order(symbol,float(amount),float(limit),order_id)
-                order_id=order_id+1
+                order_id+=1
                 transaction_obj.sequence.append(order)
                 pass
 

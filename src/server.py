@@ -24,6 +24,7 @@ pass
 order_id=1
 
 def process_request(connection, client_address):
+    global order_id
     try:
         print('connection from', client_address)
         # Receive the data in small chunks and retransmit it
@@ -53,6 +54,7 @@ def process_request(connection, client_address):
                 print("Error:")
                 print(new_obj.err)
             if sub.type=='order':
+                order_id += 1
                 new_obj= create_order(connect(),sub,obj.account_id)
                 print(new_obj)
                 print("Error:")
@@ -78,10 +80,12 @@ sock.bind(server_address)
 
 # Listen for incoming connections                                                                                
 sock.listen(1)
-
+a=threading.Lock.acquire()
 while True:
     # Wait for a connection                                                                                      
     print('waiting for a connection')
     connection, client_address = sock.accept()
     t=threading.Thread(target=process_request(connection,client_address))
     t.start()
+
+
