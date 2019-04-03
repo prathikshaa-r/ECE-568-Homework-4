@@ -320,14 +320,14 @@ def query_order(conn, query_obj):
 def test_query():
     query_obj = Query(13)
     resp = query_order(connect(), query_obj)
-    for row in resp.trans_resp:
-        print(row)
-        pass
+    # for row in resp.trans_resp:
+    #     print(row)
+    #     pass
 
-    if not resp.success:
-        print(resp.err)
-        pass
-    
+    # if not resp.success:
+    #     print(resp.err)
+    #     pass
+    print(resp)
 
 test_query()
 

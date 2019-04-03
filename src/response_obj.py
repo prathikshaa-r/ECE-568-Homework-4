@@ -21,6 +21,22 @@ class TransactionResponse:
         self.trans_resp = [] #the array of Sub_Response objects
         self.success = True
         self.err = ""
+        pass
+
+    # print Transaction response object
+    def __repr__(self):
+        print('Trans id: ' + str(self.trans_id))
+        print('Type: ' + self.type)
+        print('Status: ' + str(self.success))
+        if not self.success:
+            print('Error: ' + self.err)
+            pass
+        else:
+            for subresponse in self.trans_resp:
+                print(subresponse)
+                pass
+        
+        return ''
         
 #Response=[]
 #contains Order_resp and TransactionResponse
