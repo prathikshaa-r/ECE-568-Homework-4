@@ -30,6 +30,17 @@ def process_request(connection, client_address):
         length=recvall(connection,28)
         recv_string=recvall(connection,int.from_bytes(length, byteorder='big'))
         obj=parse_xml(recv_string)
+        # for sub in obj.sequence:
+        #     if sub.type=='account':
+        #         obj = create_account(connect(),sub)
+        #         print(obj)
+        #         print("Error:")
+        #         print(obj.err)
+        #     if sub.type=='position':
+        #         obj = create_position(connect(),sub)
+        #         print(obj)
+        #         print("Error:")
+        #         print(obj.err)
         for sub in obj.sequence:
             if sub.type=='account':
                 obj = create_account(connect(),sub)
