@@ -155,7 +155,7 @@ def test_position_creation():
            
 #-----------------------------------------Transactions-----------------------------------------#
 
-def create_order(conn, order, account_id, trans_id):
+def create_order(conn, order, account_id):
     # type checking inputs
     try:
         amount_float = float(order.amount)
@@ -175,7 +175,7 @@ def create_order(conn, order, account_id, trans_id):
     # """
     if buy is True:
         print('is a buy order')
-        order = create_buy_order(conn, order, account_id, order.trans_id)
+        order = create_buy_order(conn, order, account_id)
     # """
     # Sell Order
     # Reduce amount in positions
@@ -183,7 +183,7 @@ def create_order(conn, order, account_id, trans_id):
 
     else:
         print('is a sell order')
-        order = create_sell_order(conn, order, account_id, order.trans_id)
+        order = create_sell_order(conn, order, account_id)
         pass
 
     # match_order(order)
