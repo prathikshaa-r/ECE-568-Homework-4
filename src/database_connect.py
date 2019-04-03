@@ -186,7 +186,7 @@ def create_order(conn, order, account_id, trans_id):
         order = create_sell_order(conn, order, account_id, trans_id)
         pass
 
-    match_order(order)
+    # match_order(order)
     return order
         
 def create_buy_order(conn, order, account_id, trans_id):
@@ -248,7 +248,7 @@ def create_sell_order(conn, order, account_id, trans_id):
     except psycopg2.IntegrityError:
         # raise
         order.success = False
-        order.err = "Failed to create order " + sys.exc_info()
+        order.err = "Database Error: Invalid account or symbol or combination thereof " + sys.exc_info()
         pass
     
     except:
@@ -262,9 +262,9 @@ def create_sell_order(conn, order, account_id, trans_id):
     return order
 
 def test_order():
-    account_id = 123456
+    account_id = 1
 
-    sym = "aa"
+    sym = "abc"
     amount = -1000
     limit_price = 125
     
@@ -278,3 +278,39 @@ def test_order():
     return
 
 # test_order()
+
+def query_order(conn, query_obj):
+    query_resp = TransactionResponse()
+    try:
+        trans_id = int(query_obj.trans_id)
+    except:
+        query_resp.success = False
+        query_resp.err = 'Invalid format of transaction id'
+        pass
+    try:
+        cur = conn.cursor()
+        cur.execute('''SELECT status, amount, limit_price FROM Orders WHERE trans_id = %s;''', (trans_id,))
+        rows = cur.fetchall()
+        for row in rows:
+            resp = TransactionSubResponse(row[0], row[1], row[2], 'random_time')
+            query_resp.append(resp)
+    except psycopg2.IntegrityError:
+        # raise
+        order.success = False
+        order.err = "Database Error: Invalid account or symbol or combination thereof " + sys.exc_info()
+        pass
+    
+    except:
+        # print('Failed to create sell order', sys.exc_info())
+        order.success = False
+        order.err = "Failed to create order " + sys.exc_info()
+        pass
+
+    conn.commit()
+    pass
+    return query_resp
+
+
+def cancel_order(trans_id):
+    trans_id = int(query_obj.trans_id)
+    return

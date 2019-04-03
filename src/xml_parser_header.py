@@ -100,8 +100,6 @@ class Query:
     def __init__(self, trans_id):
         self.trans_id = trans_id
         self.type = 'query'
-        self.success = True
-        self.err = ""
 
     """
     print function
@@ -115,8 +113,6 @@ class Cancel:
     def __init__(self, trans_id):
         self.trans_id = trans_id
         self.type = 'cancel'
-        self.success = True
-        self.err = ""
 
     """
     print function
