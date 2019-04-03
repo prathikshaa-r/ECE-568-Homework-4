@@ -3,7 +3,7 @@ import random, string
 from xml.etree.ElementTree import Element, SubElement
 from ElementTree_pretty import prettify
 from xml_parser_header import Create_obj,Account,Position, Order
-from response_obj import Order_resp,TransactionResponse,TransactionSubResponse
+from response_obj import TransactionResponse,TransactionSubResponse
 
 def randomword(length):
    letters = string.ascii_uppercase
@@ -41,19 +41,18 @@ def transaction_response(response):
     top=Element('results')
     for child in response:
         if child.type=='order':
-            if (child.open):
-                attributes={"sym":child.sym, "amount":child.amount, "limit":child.limit, "id":child.id}
+            if (child.success):
+                attributes={"sym":child.symbol, "amount":child.amount, "limit":child.limit_price, "id":child.trans_id}
                 node=SubElement(top,'opened',attributes)
             else:
-                attributes={"sym":child.sym, "amount":child.amount, "limit":child.limit}
+                attributes={"sym":child.symbol, "amount":child.amount, "limit":child.limit_price}
                 node=SubElement(top,'error',attributes)
-                node.text=child.msg
-        if child.type=='transac':
+                node.text=child.err
+        if child.type == 'query' or child.type == 'cancel':
             attributes={"id":child.trans_id}
-            node
-            if child.request=='query':
+            if child.type=='query':
                 node=SubElement(top,'status',attributes)
-            if child.request=='cancel':
+            if child.type=='cancel':
                 node=SubElement(top,'canceled',attributes)
             for grand_child in child.trans_resp:
                 if(grand_child.status=='open'):
@@ -70,20 +69,20 @@ def transaction_response(response):
 """
 create_response() test
 """
-"""
-account1=Account('1',1000)
-account2=Account('2',2000)
-account2.create=False
-position1=Position('STOCK1','1',200)
-position2=Position('STOCK2','2',300)
-position2.create=False
-create=Create_obj()
-create.sequence.append(account1)
-create.sequence.append(account2)
-create.sequence.append(position1)
-create.sequence.append(position2)
-create_response(create)
-"""
+
+# account1=Account('1',1000)
+# account2=Account('2',2000)
+# account2.create=False
+# position1=Position('STOCK1','1',200)
+# position2=Position('STOCK2','2',300)
+# position2.create=False
+# create=Create_obj()
+# create.sequence.append(account1)
+# create.sequence.append(account2)
+# create.sequence.append(position1)
+# create.sequence.append(position2)
+# create_response(create)
+
 
 
 
@@ -91,28 +90,31 @@ create_response(create)
 transaction_response() test
 """
 
-"""
-order1=Order('DUKE','3000','4000')
-Order1=Order_resp(order1,True,'open','1')
-order2=Order('UNC','300','400')
-Order2=Order_resp(order2,False,'err','2')
-trs1=TransactionSubResponse('open','300','300','300')
-trs2=TransactionSubResponse('canceled','20','20','20')
-trs3=TransactionSubResponse('executed','66','66','66')
-tr1=TransactionResponse('1','query')
-tr1.trans_resp.append(trs1)
-tr1.trans_resp.append(trs2)
-tr1.trans_resp.append(trs3)
-tr2=TransactionResponse('2','cancel')
-tr2.trans_resp.append(trs2)
-tr2.trans_resp.append(trs3)
-response=[]
-response.append(Order1)
-response.append(Order2)
-response.append(tr1)
-response.append(tr2)
-transaction_response(response)
-"""
+
+# order1=Order('DUKE','3000','4000','4')
+# order1.err='1'
+# order2=Order('UNC','300','400','5')
+# order2.success=False
+# order2.status='cancelled'
+# order2.err='2'
+#
+# trs1=TransactionSubResponse('open','300','300','300')
+# trs2=TransactionSubResponse('canceled','20','20','20')
+# trs3=TransactionSubResponse('executed','66','66','66')
+# tr1=TransactionResponse('1','query')
+# tr1.trans_resp.append(trs1)
+# tr1.trans_resp.append(trs2)
+# tr1.trans_resp.append(trs3)
+# tr2=TransactionResponse('2','cancel')
+# tr2.trans_resp.append(trs2)
+# tr2.trans_resp.append(trs3)
+# response=[]
+# response.append(order1)
+# response.append(order2)
+# response.append(tr1)
+# response.append(tr2)
+# transaction_response(response)
+
 
 
 
