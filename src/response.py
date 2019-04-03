@@ -1,28 +1,33 @@
 #!/usr/bin/python3
+import random, string
 from xml.etree.ElementTree import Element, SubElement
 from ElementTree_pretty import prettify
 from xml_parser_header import Create_obj,Account,Position, Order
 from response_obj import Order_resp,TransactionResponse,TransactionSubResponse
+
+def randomword(length):
+   letters = string.ascii_uppercase
+   return ''.join(random.choice(letters) for i in range(length))
 
 ##response of create
 def create_response(create):#create=Create_obj()
     top=Element('results')
     for child in create.sequence:
         if child.type=='account':
-            if child.create:
-                attributes={"id":child.id}
+            if child.created:
+                attributes={"id":child.account_id}
                 node=SubElement(top,'created',attributes)
             else:
-                attributes={"id":child.id}
+                attributes={"id":child.account_id}
                 node=SubElement(top,'error',attributes)
                 node.text=child.msg
         
         elif child.type=='position':
-            if child.create:
-                attributes={"sym":child.symbol,"id":child.account_id}
+            if child.created:
+                attributes={"id":child.account_id,"sym":child.symbol}
                 node=SubElement(top,'created',attributes)
             else:
-                attributes={"sym":child.symbol,"id":child.account_id}
+                attributes={"id":child.account_id,"sym":child.symbol}
                 node=SubElement(top,'error',attributes)
                 node.text=child.msg
     print(prettify(top))
@@ -81,9 +86,11 @@ create_response(create)
 """
 
 
+
 """
 transaction_response() test
 """
+
 """
 order1=Order('DUKE','3000','4000')
 Order1=Order_resp(order1,True,'open','1')
@@ -105,8 +112,40 @@ response.append(Order2)
 response.append(tr1)
 response.append(tr2)
 transaction_response(response)
-
 """
+
+
+
+def create_request():
+    top=Element('create')
+    attributes1={"id":str(random.randint(1,10001)),"balance":str(random.randint(1,10001))}
+    SubElement(top, 'account', attributes1)
+    attributes2={"sym":randomword(3)}
+    node=SubElement(top,'symbol',attributes2)
+    attributes3={"id":str(random.randint(1,10001))}
+    node1=SubElement(node,'account',attributes3)
+    node1.text=str(random.randint(1,10001))
+    print(prettify(top))
+
+def transaction_request():
+    top=Element('transactions')
+    attributes1={'id':str(random.randint(1,10001))}
+    top.attrib=attributes1
+    attributes2={'sym':randomword(3),'amount':str(random.randint(-10000,10001)),'limit':str(random.randint(1,10001))}
+    SubElement(top,'order',attributes2)
+    attributes3={'id':str(random.randint(1,10001))}
+    SubElement(top,'query',attributes3)
+    attributes4={'id':str(random.randint(1,10001))}
+    SubElement(top,'cancel',{'id':str(random.randint(1,10001))})
+    print(prettify(top))
+
+
+
+
+
+
+
+
 
 
 
