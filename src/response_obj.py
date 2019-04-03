@@ -25,11 +25,11 @@ class TransactionResponse:
 
     # print Transaction response object
     def __repr__(self):
-        print('Trans id: ' + str(self.trans_id))
-        print('Type: ' + self.type)
-        print('Status: ' + str(self.success))
+        print('Trans id: ', str(self.trans_id))
+        print('Type: ' , self.type)
+        print('Status: ', str(self.success))
         if not self.success:
-            print('Error: ' + self.err)
+            print('Error: ', self.err)
             pass
         else:
             for subresponse in self.trans_resp:
