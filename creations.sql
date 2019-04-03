@@ -58,10 +58,13 @@ UPDATE Orders SET Status='cancelled' WHERE trans_id=5
 /* Order matching */
 
 /* Select the head of buy priority queue -- maybe multiple rows, need to break ties */
-SELECT * FROM Orders WHERE limit_price = (SELECT max(limit_price) FROM Orders WHERE amount>0);
+SELECT trans_id, maount, limit_price, account_id  FROM Orders
+WHERE symbol = %s AND status = 'open' AND
+limit_price = (SELECT max(limit_price) FROM Orders WHERE amount>0);
 
 SELECT * FROM Orders
-WHERE limit_price = (SELECT min(limit_price) FROM Orders WHERE amount<0);
+WHERE symbol='aa' AND status = 'open' AND
+limit_price = (SELECT min(limit_price) FROM Orders WHERE amount<0);
 
 /* Executed */
 /* executed in part 
