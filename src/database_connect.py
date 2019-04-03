@@ -329,7 +329,7 @@ def test_query():
     #     pass
     print(resp)
 
-test_query()
+# test_query()
 
 def cancel_order(conn, cancel_obj):
     cancel_resp = TransactionResponse(cancel_obj.trans_id, 'cancel')
@@ -383,14 +383,14 @@ def test_cancel():
     #     pass
     print(resp)
 
-test_cancel()
+# test_cancel()
 
 '''
 Match all orders on a given symbol.
 Uses symbol lock
 account balance update requires a global lock
 '''
-def match_order(symbol):
+def match_order(conn, symbol):
     # get highest buy order
     # get lowest sell order
     # if they match
@@ -398,6 +398,33 @@ def match_order(symbol):
     # what is the exec price - price of lower trans_id
     # update money in both accounts
     # update Positions in buyer account
+    try:
+        cur = conn.cursor()
+        cur.execute('''SELECT trans_id, amount, limit_price, account_id  FROM Orders 
+        WHERE symbol = %s AND status = 'open' AND
+        limit_price = (SELECT max(limit_price) FROM Orders WHERE amount>0);''', (symbol,))
+        open_buy_orders = cur.fetchall()
+        if not open_buy_orders:
+            print('No buy orders open for symbol')
+            return
+        for open_buy_order in open_buy_orders:
+            print()
+            pass
 
+        cur.execute('''SELECT trans_id, amount, limit_price, account_id FROM Orders
+        WHERE symbol=%s AND status = 'open' AND
+        limit_price = (SELECT min(limit_price) FROM Orders WHERE amount<0);''', (symbol,))
+        open_sell_orders = cur.fetchall()
+        if not open_sell_orders:
+            print('No sell orders open for symbol')
+            return
+        for open_sell_order in open_sell_orders:
+            print()
+            pass
+            
+
+    except psycopg2.IntegrityError:
+        print('Datbase Error: Order matching failed')
     return
 
+match_order(connect(), 'SPY')
