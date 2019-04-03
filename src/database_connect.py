@@ -384,3 +384,20 @@ def test_cancel():
     print(resp)
 
 test_cancel()
+
+'''
+Match all orders on a given symbol.
+Uses symbol lock
+account balance update requires a global lock
+'''
+def match_order(symbol):
+    # get highest buy order
+    # get lowest sell order
+    # if they match
+    # how many shares in each matched
+    # what is the exec price - price of lower trans_id
+    # update money in both accounts
+    # update Positions in buyer account
+
+    return
+
