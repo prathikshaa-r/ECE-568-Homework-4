@@ -420,6 +420,8 @@ def match_order(conn, symbol):
     # what is the exec price - price of lower trans_id
     # update money in both accounts
     # update Positions in buyer account
+
+    # lock(symbol)
     try:
         cur = conn.cursor()
         cur.execute('''SELECT trans_id, amount, limit_price, account_id  FROM Orders 
@@ -490,8 +492,10 @@ def match_order(conn, symbol):
                 # credit (buyer_price - exec_price) * exec_shares to buyer account
                 refund = (buy_match[2] - exec_price) * exec_shares
                 if refund != 0:
+                # lock(Accounts)
                     cur.execute('''UPDATE Accounts SET balance = balance + %s
                     WHERE account_id = %s''', (refund, buy_match[3]))
+                # unlock(Accounts)
                 pass
 
             # insert exec_shares into buyer account Positions
