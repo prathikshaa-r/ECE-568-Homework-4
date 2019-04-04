@@ -28,7 +28,7 @@ from response_obj import *
 # Connects to the database and returns database connection object
 
 lock_table={}
-account_lock=threading.Lock
+account_lock=threading.Lock()
 
 def connect():
     database = 'exchange_matching'
@@ -266,7 +266,7 @@ def create_sell_order(conn, order, account_id):
             symbol_lock = lock_table[order.symbol]
             symbol_lock.acquire()
         else:
-            lock_table[order.symbol] = threading.Lock
+            lock_table[order.symbol] = threading.Lock()
             symbol_lock = lock_table[order.symbol]
             symbol_lock.acquire()
 
