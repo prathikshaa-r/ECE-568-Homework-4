@@ -52,8 +52,24 @@ VALUES (6, 'aa', 400, 125, 12);
 SELECT * FROM Orders WHERE trans_id=10;
 
 /* Cancel */
-UPDATE Orders SET Status='cancelled' WHERE trans_id=5
+SELECT * FROM Orders WHERE trans_id = 10 AND Status = 'open'
+UPDATE Orders SET Status='cancelled' WHERE trans_id=10 AND Status = 'open'
+/* for each order:
+	if amount > 0:
+		refund = amount * limit_price
+		refund(conn, account_id, refund)
+		# account with amount * limit_price
+	if amount < 0:
+		position = Position(symbol, account_id, amount)	
+		create_position(conn, position)
 
+def refund(conn, account_id, amount):
+	try:
+		cur = conn.cursor()
+		cur.execute('''UPDATE Accounts SET balance = balance + %s
+                    WHERE account_id = %s''', (refund, buy_match[3]))
+
+*/
 
 /* Order matching */
 

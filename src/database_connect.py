@@ -188,7 +188,8 @@ def create_order(conn, order, account_id):
         account_id_int = int(account_id)
         limit_price_float = float(order.limit_price)
     except: # ValueError
-        raise
+        order.success = False
+        order.err = "Invalid order creation inputs"
 
     buy = True
     if order.amount < 0 :
@@ -372,6 +373,22 @@ def test_query():
 
 # test_query()
 
+# used to credit money to accounts on successful sell/buy or refunded buy
+def refund(conn, account_id, refund_amount):
+    try:
+        cur = conn.cursor()
+        cur.execute('''UPDATE Accounts SET balance = balance + %s
+                    WHERE account_id = %s''', (refund_amount, account_id))
+    except psycopg2.IntegrityError:
+        print('Failed to deposit money to account')
+        throw
+    except:
+        print('Failed to deposit money to account')
+        print (sys.exc_info())
+        throw
+    return
+
+
 # todo: credit money and shares back to buyer and seller when transac cancelled
 def cancel_order(conn, cancel_obj):
     cancel_resp = TransactionResponse(cancel_obj.trans_id, 'cancel')
@@ -386,7 +403,7 @@ def cancel_order(conn, cancel_obj):
     try:
         cur = conn.cursor()
 
-        cur.execute('''UPDATE Orders SET Status='cancelled' WHERE trans_id=%s AND Status = 'open' ''', (trans_id,))
+        cur.execute('''UPDATE Orders SET Status='cancelled' WHERE trans_id=%s AND Status = 'open';''', (trans_id,))
         
         cur.execute('''SELECT status, amount, limit_price FROM Orders WHERE trans_id = %s;''', (trans_id,))
         rows = cur.fetchall()
@@ -398,6 +415,8 @@ def cancel_order(conn, cancel_obj):
         for row in rows:
             resp = TransactionSubResponse(row[0], row[1], row[2], 'random_time')
             cancel_resp.trans_resp.append(resp)
+
+
     except psycopg2.IntegrityError:
         # raise
         cancel_resp.success = False
@@ -452,29 +471,32 @@ def match_order(conn, symbol):
         if not open_buy_orders:
             print('No buy orders open for symbol')
             return
-        
+
+        # debug print
         for open_buy_order in open_buy_orders:
             print(open_buy_order)
             pass
 
         # break ties in buy order based on trans_id [0]
-        buy_match = sorted(open_buy_orders, key = lambda i: i[1], reverse = True)[0]
+        buy_match = sorted(open_buy_orders, key = lambda i: i[0], reverse = False)[0]
         print('buy match: ', buy_match)
 
         cur.execute('''SELECT trans_id, amount, limit_price, account_id FROM Orders
-        WHERE symbol=%s AND status = 'open' AND amount < 0 AND
-        limit_price = (SELECT min(limit_price) FROM Orders WHERE amount<0 AND symbol = %s);''', (symbol, symbol))
-        open_sell_orders = cur.fetchall()
+                    WHERE symbol=%s AND status = 'open' AND amount < 0 AND
+                    limit_price = (SELECT min(limit_price) FROM Orders WHERE amount<0 AND symbol = %s);''', (symbol, symbol))
+                    open_sell_orders = cur.fetchall()
 
         if not open_sell_orders:
             print('No sell orders open for symbol')
             return
 
+        # debug print
         for open_sell_order in open_sell_orders:
             print(open_sell_order)
             pass
 
-        sell_match = sorted(open_sell_orders, key = lambda i: i[1], reverse = True)[0]
+        # break ties in sell order based on trans_id [0]
+        sell_match = sorted(open_sell_orders, key = lambda i: i[0], reverse = False)[0]
         print('sell match: ', sell_match)
 
         if(buy_match[2] >= sell_match[2]):
@@ -506,11 +528,10 @@ def match_order(conn, symbol):
                 pass
             else:
                 # credit (buyer_price - exec_price) * exec_shares to buyer account
-                refund = (buy_match[2] - exec_price) * exec_shares
-                if refund != 0:
+                refund_amount = (buy_match[2] - exec_price) * exec_shares
+                if refund_amount != 0:
                 # lock(Accounts)
-                    cur.execute('''UPDATE Accounts SET balance = balance + %s
-                    WHERE account_id = %s''', (refund, buy_match[3]))
+                    refund(conn, buy_match[3], refund_amount)
                 # unlock(Accounts)
                 pass
 
@@ -520,8 +541,7 @@ def match_order(conn, symbol):
 
             # credit seller account with transac_cost
         # lock(Accounts)
-            cur.execute('''UPDATE Accounts SET balance = balance + %s
-            WHERE account_id = %s''', (transac_cost, sell_match[3]))
+            refund(conn, transac_cost, sell_match[3]))
         # unlock(Accounts)
 
     except psycopg2.IntegrityError:

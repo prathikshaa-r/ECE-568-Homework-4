@@ -2,16 +2,16 @@
 <!-- sell 01 tie -->
 <transactions id="01234">
     <order sym="TEST2" amount="-250" limit="100"/>
-    <query id="TRANS_ID"/>
-    <cancel id="TRANS_ID"/>
+    <query id="1"/>
+    <query id="2"/>
 </transactions>
 
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- sell 02 tie -->
 <transactions id="234567">
     <order sym="TEST2" amount="-400" limit="100"/>
-    <query id="TRANS_ID"/>
-    <cancel id="TRANS_ID"/>
+    <query id="1"/>
+    <cancel id="2"/>
 </transactions>
 
 <?xml version="1.0" encoding="UTF-8"?>
