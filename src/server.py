@@ -76,9 +76,9 @@ def process_request(connection, client_address):
                 print(new_obj)
                 db_conn.close()
         if obj.type == 'create':
-            create_response(response)
+            connection.send(create_response(response).encode('utf-8'))
         if obj.type == 'transac':
-            transaction_response(response)
+            connection.send(transaction_response(response).encode('utf-8'))
 
 
     finally:

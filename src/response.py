@@ -30,7 +30,7 @@ def create_response(create):#create=Create_obj()
                 attributes={"id":str(child.account_id),"sym":child.symbol}
                 node=SubElement(top,'error',attributes)
                 node.text=child.err
-    print(prettify(top))
+    return prettify(top)
 
 
 
@@ -64,7 +64,7 @@ def transaction_response(response):
                 if(grand_child.status=='executed'):
                     sub_attributes = {"shares": str(grand_child.shares), "price": str(grand_child.price), "time": str(grand_child.time)}
                     subnode = SubElement(node, 'executed', sub_attributes)
-    print(prettify(top))
+    return prettify(top)
 
 """
 create_response() test
