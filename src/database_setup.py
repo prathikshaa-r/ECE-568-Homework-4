@@ -2,17 +2,22 @@
 import psycopg2
 import sys
 
-try:
-    database='exchange_matching'
-    conn = psycopg2.connect(database='exchange_matching',\
+retry=5
+while retry:
+    try:
+        database='exchange_matching'
+        conn = psycopg2.connect(database='exchange_matching',\
                                 user='postgres', password='passw0rd',\
-                                host='0.0.0.0', port='5432')
+                                host='db', port='5432')
 
-    print("Opened database %s successfully." % database)
-except:
-    print("Failed to connect to database %s.", database)
-    sys.exit()
-    pass
+        print("Opened database %s successfully." % database)
+        break
+    except:
+        print("Failed to connect to database %s.", database)
+        time.sleep(3)
+        retry-=1
+
+
 
 try:    
     cur = conn.cursor()
