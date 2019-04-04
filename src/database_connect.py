@@ -46,7 +46,7 @@ def connect():
             print("Failed to connect to database ", database)
             time.sleep(3)
             retry = retry - 1
-            print("%s retries left", retry)
+            print("retries left: ", retry)
     return conn
 
 
