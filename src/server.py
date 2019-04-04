@@ -45,28 +45,36 @@ def process_request(connection, client_address):
         response = []
         for sub in obj.sequence:
             if sub.type == 'account':
-                new_obj = create_account(connect(), sub)
+                db_conn = connect()
+                new_obj = create_account(db_conn, sub)
                 response.append(new_obj)
                 print(new_obj)
                 print("Error:")
                 print(new_obj.err)
+                db_conn.close()
             if sub.type == 'position':
-                new_obj = create_position(connect(), sub)
+                db_conn = connect()
+                new_obj = create_position(db_conn, sub)
                 response.append(new_obj)
                 print(new_obj)
                 print("Error:")
                 print(new_obj.err)
+                db_conn.close()
             if sub.type == 'order':
+                db_conn = connect()
                 order_id += 1
-                new_obj = create_order(connect(), sub, obj.account_id)
+                new_obj = create_order(db_conn, sub, obj.account_id)
                 response.append(new_obj)
                 print(new_obj)
                 print("Error:")
                 print(new_obj.err)
+                db_conn.close()
             if sub.type == 'query':
-                new_obj = query_order(connect(), sub)
+                db_conn = connect()
+                new_obj = query_order(db_conn, sub)
                 response.append(new_obj)
                 print(new_obj)
+                db_conn.close()
         if obj.type == 'create':
             create_response(response)
         if obj.type == 'transac':
