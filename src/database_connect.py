@@ -452,14 +452,12 @@ def match_order(conn, symbol):
         if not open_buy_orders:
             print('No buy orders open for symbol')
             return
-
-        # top_buy_order
-        # top_index
         
         for open_buy_order in open_buy_orders:
             print(open_buy_order)
             pass
 
+        # break ties in buy order based on trans_id [0]
         buy_match = sorted(open_buy_orders, key = lambda i: i[1], reverse = True)[0]
         print('buy match: ', buy_match)
 
@@ -472,9 +470,6 @@ def match_order(conn, symbol):
             print('No sell orders open for symbol')
             return
 
-        # top_sell_order
-        # top_sell_index
-        
         for open_sell_order in open_sell_orders:
             print(open_sell_order)
             pass
@@ -485,7 +480,7 @@ def match_order(conn, symbol):
         if(buy_match[2] >= sell_match[2]):
             match = True
 
-            # determine exec_price 
+            # determine exec_price from limit_price [2]
             if buy_match[0] <= sell_match[0]:
                 buyer_price = True
                 exec_price = buy_match[2]
@@ -495,14 +490,14 @@ def match_order(conn, symbol):
                 exec_price = sell_match[2]
                 pass
 
-            # determine exec_shares
-            if buy_match[1] <= sell_match[1]:
+            # determine exec_shares from amount [1]
+            if buy_match[1] <= abs(sell_match[1]):
                 buyer_shares = True
                 exec_shares = buy_match[1]
                 pass
             else:
                 buyer_shares = False
-                exec_shares = sell_match[1]
+                exec_shares = abs(sell_match[1])
                 pass
             
             transac_cost = exec_price * exec_shares
@@ -529,11 +524,11 @@ def match_order(conn, symbol):
             WHERE account_id = %s''', (transac_cost, sell_match[3]))
         # unlock(Accounts)
 
-        
-                    
-
     except psycopg2.IntegrityError:
         print('Database Error: Order matching failed')
-    return
+        return
+    except:
+        print (sys.exc_info())
+        return
 
 match_order(connect(), 'aa')
