@@ -379,8 +379,11 @@ def refund(conn, account_id, refund_amount):
         cur = conn.cursor()
         cur.execute('''UPDATE Accounts SET balance = balance + %s
                     WHERE account_id = %s''', (refund_amount, account_id))
+        print('refunded to account',  refund_amount, account_id)
+        conn.commit()
     except psycopg2.IntegrityError:
         print('Failed to deposit money to account')
+        print (sys.exc_info())
         throw
     except:
         print('Failed to deposit money to account')
@@ -459,7 +462,7 @@ def test_cancel():
     #     pass
     print(resp)
 
-test_cancel()
+# test_cancel()
 
 '''
 Match all orders on a given symbol.
@@ -556,8 +559,35 @@ def match_order(conn, symbol):
 
             # credit seller account with transac_cost
         # lock(Accounts)
-            refund(conn, transac_cost, sell_match[3])
+            print('seller account_id = ', sell_match[3])
+            refund(conn, sell_match[3], transac_cost)
         # unlock(Accounts)
+
+        if buyer_shares:
+            print('buyer bought all %s shares.', exec_shares)
+            cur.execute('''UPDATE Orders SET status='executed' 
+                WHERE trans_id = %s''', (buy_match[0],))
+            cur.execute('''UPDATE Orders SET amount = amount + %s 
+                WHERE trans_id = %s''', (exec_shares, sell_match[0]))
+            cur.execute('''INSERT INTO Orders(trans_id, symbol, amount, limit_price, account_id, status)
+                VALUES(%s, %s, %s, %s, %s, %s)''',
+                (sell_match[0], symbol, (-exec_shares), sell_match[2], sell_match[3], 'executed'))
+            pass
+        else:
+            print('seller sold all %s shares', exec_shares)
+            cur.execute('''UPDATE Orders SET status='executed' 
+                WHERE trans_id = %s''', (sell_match[0],))
+            cur.execute('''UPDATE Orders SET amount = amount - %s 
+                WHERE trans_id = %s''', (exec_shares, buy_match[0]))
+            cur.execute('''INSERT INTO Orders(trans_id, symbol, amount, limit_price, account_id, status)
+                VALUES(%s, %s, %s, %s, %s, %s)''',
+                (buy_match[0], symbol, exec_shares, buy_match[2], buy_match[3], 'executed'))
+            pass
+
+        print('num of shares = ', exec_shares)
+        print('transaction price = ', transac_cost)
+
+        conn.commit()
 
     except psycopg2.IntegrityError:
         print('Database Error: Order matching failed')
@@ -566,4 +596,4 @@ def match_order(conn, symbol):
         print (sys.exc_info())
         return
 
-# match_order(connect(), 'aa')
+match_order(connect(), 'aa')
