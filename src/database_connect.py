@@ -184,6 +184,8 @@ def test_position_creation():
            
 #-----------------------------------------Transactions-----------------------------------------#
 
+# thread-safe
+# basic exception guarantee
 def create_order(conn, order, account_id):
     # type checking inputs
     try:
@@ -217,9 +219,11 @@ def create_order(conn, order, account_id):
         order = create_sell_order(conn, order, account_id)
         pass
 
-    # match_order(order)
+    # match_order(conn, order.symbol)
     return order
-        
+
+# thread-safe
+# basic exception guarantee
 def create_buy_order(conn, order, account_id):
     global account_lock
     try:
@@ -229,6 +233,10 @@ def create_buy_order(conn, order, account_id):
         account_lock.acquire()
         cur.execute('''SELECT balance FROM Accounts WHERE account_id = %s''', (account_id,))
         row = cur.fetchone()
+        if not row:
+            order.success = False
+            order.err = 'Account does not exist'
+            return order
         balance = row[0]
         share_price = order.limit_price * order.amount
         if balance < share_price:
@@ -258,6 +266,8 @@ def create_buy_order(conn, order, account_id):
     account_lock.release()
     return order
 
+# thread-safe
+# basic exception guarantee
 def create_sell_order(conn, order, account_id):
     global lock_table
     try:
@@ -362,7 +372,7 @@ def query_order(conn, query_obj):
     return query_resp
 
 def test_query():
-    query_obj = Query('asd')
+    query_obj = Query(10000000)
     resp = query_order(connect(), query_obj)
     # for row in resp.trans_resp:
     #     print(row)
@@ -373,9 +383,10 @@ def test_query():
     #     pass
     print(resp)
 
-# test_query()
+test_query()
 
 # used to credit money to accounts on successful sell/buy or refunded buy
+# not thread safe
 def refund(conn, account_id, refund_amount):
     try:
         cur = conn.cursor()
@@ -394,6 +405,7 @@ def refund(conn, account_id, refund_amount):
     return
 
 def cancel_order(conn, cancel_obj):
+    global account_lock
     cancel_resp = TransactionResponse(cancel_obj.trans_id, 'cancel')
 
     try:
@@ -422,7 +434,9 @@ def cancel_order(conn, cancel_obj):
                 pass
             else:
                 refund_amount = limit_price * amount
+                account_lock.acquire()
                 refund(conn, account_id, refund_amount)
+                account_lock.release()
                 pass
             pass
         conn.commit()
@@ -472,6 +486,7 @@ Uses symbol lock
 account balance update requires a global lock
 '''
 def match_order(conn, symbol):
+    global account_lock
     # get highest buy order
     # get lowest sell order
     # if they match
@@ -482,6 +497,7 @@ def match_order(conn, symbol):
 
     # lock(symbol)
     try:
+        match = False
         cur = conn.cursor()
         cur.execute('''SELECT trans_id, amount, limit_price, account_id  FROM Orders 
         WHERE symbol = %s AND status = 'open' AND amount > 0 AND
@@ -490,7 +506,7 @@ def match_order(conn, symbol):
 
         if not open_buy_orders:
             print('No buy orders open for symbol')
-            return
+            return match
 
         # debug print
         for open_buy_order in open_buy_orders:
@@ -508,7 +524,7 @@ def match_order(conn, symbol):
 
         if not open_sell_orders:
             print('No sell orders open for symbol')
-            return
+            return match
 
         # debug print
         for open_sell_order in open_sell_orders:
@@ -551,7 +567,9 @@ def match_order(conn, symbol):
                 refund_amount = (buy_match[2] - exec_price) * exec_shares
                 if refund_amount != 0:
                 # lock(Accounts)
+                    account_lock.acquire()
                     refund(conn, buy_match[3], refund_amount)
+                    account_lock.release()
                 # unlock(Accounts)
                 pass
 
@@ -562,7 +580,9 @@ def match_order(conn, symbol):
             # credit seller account with transac_cost
         # lock(Accounts)
             print('seller account_id = ', sell_match[3])
+            account_lock.acquire()
             refund(conn, sell_match[3], transac_cost)
+            account_lock.release()
         # unlock(Accounts)
 
         if buyer_shares:
@@ -593,9 +613,11 @@ def match_order(conn, symbol):
 
     except psycopg2.IntegrityError:
         print('Database Error: Order matching failed')
-        return
+        match = False
+        return match
     except:
         print (sys.exc_info())
-        return
+        match = False
+        return match
 
-match_order(connect(), 'aa')
+# match_order(connect(), 'aa')
