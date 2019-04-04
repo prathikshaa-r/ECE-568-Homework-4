@@ -285,6 +285,10 @@ def create_sell_order(conn, order, account_id):
         cur.execute('''SELECT COUNT(*) FROM Positions 
         WHERE symbol = %s AND account_id = %s AND amount > (-%s)''', (order.symbol, account_id, order.amount))
         row = cur.fetchone()
+        if not row:
+            order.success = False
+            order.err = 'No such position to sell from'
+            return order
         position_count = row[0]
         if position_count != 1:
             # Insufficient Shares to sell error
