@@ -61,6 +61,7 @@ def connect():
 #create_account(connect(), test_account)
 
 def create_account(conn, account):
+    global account_lock
     try:
         account_id_int = int(account.account_id)
         balance_float = float(account.balance)
@@ -111,6 +112,7 @@ def test_account_creation():
 #create_position(connect(), test_position)
 
 def create_position(conn, position):
+    global lock_table
     try:
         amount_float = float(position.amount)
         account_id_int = int(position.account_id)
@@ -212,10 +214,12 @@ def create_order(conn, order, account_id):
     return order
         
 def create_buy_order(conn, order, account_id):
+    global account_lock
     try:
         cur = conn.cursor()
     # read-modify-write start
     # lock(Accounts)
+        account_lock.acquire()
         cur.execute('''SELECT balance FROM Accounts WHERE account_id = %s''', (account_id,))
         row = cur.fetchone()
         balance = row[0]
@@ -228,6 +232,7 @@ def create_buy_order(conn, order, account_id):
         
         cur.execute('''UPDATE Accounts SET balance = balance-%s WHERE account_id = %s''', (share_price, account_id))
         cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (order.trans_id, order.symbol, order.amount, order.limit_price, account_id))
+        account_lock.release()
     # unlock(Accounts)
     # read-modify-write end
         conn.commit()
@@ -246,10 +251,20 @@ def create_buy_order(conn, order, account_id):
     return order
 
 def create_sell_order(conn, order, account_id):
+    global lock_table
     try:
         cur = conn.cursor()
     # read-modify-write start
     # lock(Positions)
+        l = 0
+        if order.symbol in lock_table.keys():
+            l = lock_table[order.symbol]
+            l.acquire()
+        else:
+            lock_table[order.symbol] = threading.Lock
+            l = lock_table[order.symbol]
+            l.acquire()
+
         cur.execute('''SELECT COUNT(*) FROM Positions 
         WHERE symbol = %s AND account_id = %s AND amount > (-%s)''', (order.symbol, account_id, order.amount))
         row = cur.fetchone()
@@ -266,6 +281,7 @@ def create_sell_order(conn, order, account_id):
     # unlock(Postions)
     # read-modify-write end
         conn.commit()
+        l.release()
 
     except psycopg2.IntegrityError:
         # raise
