@@ -471,9 +471,14 @@ def match_order(conn, symbol):
                 pass
             else:
                 # credit (buyer_price - exec_price) * exec_shares to buyer account
+                refund = (buy_match[2] - exec_price) * exec_shares
+                if refund != 0:
+                    cur.execute('''UPDATE Accounts SET balance = balance + %s
+                    WHERE account_id = %s''', (refund, buy_match[3]))
                 pass
 
             # insert exec_shares into buyer account Positions
+            
             
                 
                     
