@@ -78,7 +78,7 @@ def create_account(conn, account):
                     , (account.account_id, account.balance))
 
         conn.commit()
-        account_lock.release()
+
 
     except psycopg2.IntegrityError:
         account.created = False
@@ -89,6 +89,7 @@ def create_account(conn, account):
         # print ('Failed to create account', sys.exc_info())
         pass
     conn.commit()
+    account_lock.release()
     return account
 
 def test_account_creation():
@@ -149,7 +150,7 @@ def create_position(conn, position):
             pass
 
         conn.commit()
-        l.release()
+
     # unlock(symbol)
     # read-modify-write end
 
@@ -163,6 +164,7 @@ def create_position(conn, position):
         position.created = False
         position.err = "Postion creation failed due to unknown reasons." # + sys.exc_info()
     conn.commit()
+    l.release()
     return position
 
 def test_position_creation():
@@ -232,7 +234,7 @@ def create_buy_order(conn, order, account_id):
         
         cur.execute('''UPDATE Accounts SET balance = balance-%s WHERE account_id = %s''', (share_price, account_id))
         cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (order.trans_id, order.symbol, order.amount, order.limit_price, account_id))
-        account_lock.release()
+
     # unlock(Accounts)
     # read-modify-write end
         conn.commit()
@@ -248,6 +250,7 @@ def create_buy_order(conn, order, account_id):
         order.err = 'Failed to create order ' 
         pass
     conn.commit()
+    account_lock.release()
     return order
 
 def create_sell_order(conn, order, account_id):
@@ -281,7 +284,7 @@ def create_sell_order(conn, order, account_id):
     # unlock(Postions)
     # read-modify-write end
         conn.commit()
-        l.release()
+
 
     except psycopg2.IntegrityError:
         # raise
@@ -297,6 +300,7 @@ def create_sell_order(conn, order, account_id):
 
     conn.commit()
     pass
+    l.release()
     return order
 
 def test_order():
