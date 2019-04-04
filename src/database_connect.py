@@ -422,40 +422,85 @@ def match_order(conn, symbol):
     try:
         cur = conn.cursor()
         cur.execute('''SELECT trans_id, amount, limit_price, account_id  FROM Orders 
-        WHERE symbol = %s AND status = 'open' AND
-        limit_price = (SELECT max(limit_price) FROM Orders WHERE amount>0);''', (symbol,))
+        WHERE symbol = %s AND status = 'open' AND amount > 0 AND
+        limit_price = (SELECT max(limit_price) FROM Orders WHERE amount>0 AND symbol = %s);''', (symbol,symbol))
         open_buy_orders = cur.fetchall()
 
         if not open_buy_orders:
             print('No buy orders open for symbol')
             return
 
-        top_buy_order
-        top_index
+        # top_buy_order
+        # top_index
         
         for open_buy_order in open_buy_orders:
             print(open_buy_order)
             pass
 
+        buy_match = sorted(open_buy_orders, key = lambda i: i[1], reverse = True)[0]
+        print('buy match: ', buy_match)
+
         cur.execute('''SELECT trans_id, amount, limit_price, account_id FROM Orders
-        WHERE symbol=%s AND status = 'open' AND
-        limit_price = (SELECT min(limit_price) FROM Orders WHERE amount<0);''', (symbol,))
+        WHERE symbol=%s AND status = 'open' AND amount < 0 AND
+        limit_price = (SELECT min(limit_price) FROM Orders WHERE amount<0 AND symbol = %s);''', (symbol, symbol))
         open_sell_orders = cur.fetchall()
 
         if not open_sell_orders:
             print('No sell orders open for symbol')
             return
 
-        top_sell_order
-        top_sell_index
+        # top_sell_order
+        # top_sell_index
         
         for open_sell_order in open_sell_orders:
             print(open_sell_order)
             pass
+
+        sell_match = sorted(open_sell_orders, key = lambda i: i[1], reverse = True)[0]
+        print('sell match: ', sell_match)
+
+        if(buy_match[2] >= sell_match[2]):
+            match = True
+
+            # determine exec_price 
+            if buy_match[0] >= sell_match[0]:
+                buyer_price = True
+                exec_price = buy_match[2]
+                pass
+            else:
+                exec_price = sell_match[2]
+                pass
+
+            # determine exec_shares
+            if buy_match[1] >= sell_match[1]:
+                buyer_shares = True
+                exec_shares = buy_match[1]
+                pass
+            else:
+                buyer_shares = False
+                exec_shares = sell_match[1]
+                pass
             
+            transac_cost = exec_price * exec_shares
+            if buyer_price:
+                # no credit to buyer account
+                pass
+            else:
+                # credit (buyer_price - exec_price) * exec_shares to buyer account
+                refund = (buy_match[2] - exec_price) * exec_shares
+                if refund != 0:
+                    cur.execute('''UPDATE Accounts SET balance = balance + %s
+                    WHERE account_id = %s''', (refund, buy_match[3]))
+                pass
+
+            # insert exec_shares into buyer account Positions
+            
+            
+                
+                    
 
     except psycopg2.IntegrityError:
-        print('Datbase Error: Order matching failed')
+        print('Database Error: Order matching failed')
     return
 
 match_order(connect(), 'aa')
