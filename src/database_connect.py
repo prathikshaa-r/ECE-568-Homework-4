@@ -541,7 +541,7 @@ def match_order(conn, symbol):
 
             # credit seller account with transac_cost
         # lock(Accounts)
-            refund(conn, transac_cost, sell_match[3]))
+            refund(conn, transac_cost, sell_match[3])
         # unlock(Accounts)
 
     except psycopg2.IntegrityError:
