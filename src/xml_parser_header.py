@@ -55,6 +55,7 @@ class Position:
         
 class Create_obj:
     def __init__(self):
+        self.type = 'create'
         self.sequence=[]
 
     """
@@ -125,6 +126,7 @@ class Cancel:
         
 class Transaction_obj:
     def __init__(self, account_id):
+        self.type = 'transac'
         self.account_id = account_id
         self.sequence = []
 

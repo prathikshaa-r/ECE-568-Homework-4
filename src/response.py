@@ -12,24 +12,24 @@ def randomword(length):
 ##response of create
 def create_response(create):#create=Create_obj()
     top=Element('results')
-    for child in create.sequence:
+    for child in create:
         if child.type=='account':
             if child.created:
-                attributes={"id":child.account_id}
+                attributes={"id":str(child.account_id)}
                 node=SubElement(top,'created',attributes)
             else:
-                attributes={"id":child.account_id}
+                attributes={"id":str(child.account_id)}
                 node=SubElement(top,'error',attributes)
-                node.text=child.msg
-        
+                node.text=child.err
+
         elif child.type=='position':
             if child.created:
-                attributes={"id":child.account_id,"sym":child.symbol}
+                attributes={"id":str(child.account_id),"sym":child.symbol}
                 node=SubElement(top,'created',attributes)
             else:
-                attributes={"id":child.account_id,"sym":child.symbol}
+                attributes={"id":str(child.account_id),"sym":child.symbol}
                 node=SubElement(top,'error',attributes)
-                node.text=child.msg
+                node.text=child.err
     print(prettify(top))
 
 
@@ -42,27 +42,27 @@ def transaction_response(response):
     for child in response:
         if child.type=='order':
             if (child.success):
-                attributes={"sym":child.symbol, "amount":child.amount, "limit":child.limit_price, "id":child.trans_id}
+                attributes={"sym":child.symbol, "amount":str(child.amount), "limit":str(child.limit_price), "id":str(child.trans_id)}
                 node=SubElement(top,'opened',attributes)
             else:
-                attributes={"sym":child.symbol, "amount":child.amount, "limit":child.limit_price}
+                attributes={"sym":child.symbol, "amount":str(child.amount), "limit":str(child.limit_price)}
                 node=SubElement(top,'error',attributes)
                 node.text=child.err
         if child.type == 'query' or child.type == 'cancel':
-            attributes={"id":child.trans_id}
+            attributes={"id":str(child.trans_id)}
             if child.type=='query':
                 node=SubElement(top,'status',attributes)
             if child.type=='cancel':
                 node=SubElement(top,'canceled',attributes)
             for grand_child in child.trans_resp:
                 if(grand_child.status=='open'):
-                    sub_attributes = {"shares": grand_child.shares}
+                    sub_attributes = {"shares": str(grand_child.shares)}
                     subnode = SubElement(node, 'open', sub_attributes)
                 if(grand_child.status=='canceled'):
-                    sub_attributes = {"shares": grand_child.shares, "time": grand_child.time}
+                    sub_attributes = {"shares": str(grand_child.shares), "time": str(grand_child.time)}
                     subnode = SubElement(node, 'canceled', sub_attributes)
                 if(grand_child.status=='executed'):
-                    sub_attributes = {"shares": grand_child.shares, "price": grand_child.price, "time": grand_child.time}
+                    sub_attributes = {"shares": str(grand_child.shares), "price": str(grand_child.price), "time": str(grand_child.time)}
                     subnode = SubElement(node, 'executed', sub_attributes)
     print(prettify(top))
 
