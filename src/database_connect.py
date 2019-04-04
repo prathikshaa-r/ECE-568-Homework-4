@@ -352,6 +352,7 @@ def test_query():
 
 # test_query()
 
+# todo: credit money and shares back to buyer and seller when transac cancelled
 def cancel_order(conn, cancel_obj):
     cancel_resp = TransactionResponse(cancel_obj.trans_id, 'cancel')
 
