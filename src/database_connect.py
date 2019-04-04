@@ -132,7 +132,7 @@ def create_position(conn, position):
             symbol_lock=lock_table[position.symbol]
             symbol_lock.acquire()
         else:
-            lock_table[position.symbol]=threading.Lock
+            lock_table[position.symbol]=threading.Lock()
             symbol_lock=lock_table[position.symbol]
             symbol_lock.acquire()
         cur.execute('''SELECT COUNT(*) FROM Positions
@@ -165,7 +165,7 @@ def create_position(conn, position):
         position.created = False
         position.err = "Postion creation failed due to unknown reasons." # + sys.exc_info()
     conn.commit()
-    l.release()
+    symbol_lock.release()
     return position
 
 def test_position_creation():
@@ -406,12 +406,14 @@ def cancel_order(conn, cancel_obj):
             RETURNING symbol, amount, limit_price, account_id;''', (trans_id,))
         cancelled_orders = cur.fetchall()
         for cancelled_order in cancelled_orders:
+            print('cancelled: ', cancelled_order)
             symbol = cancelled_order[0]
             amount = cancelled_order[1]
             limit_price = cancelled_order[2]
             account_id = cancelled_order[3]
             if amount < 0:
-                position = Position(conn, symbol, account_id, amount)
+                position = Position(symbol, account_id, abs(amount))
+                create_position(conn, position)
                 pass
             else:
                 refund_amount = limit_price * amount
@@ -431,7 +433,6 @@ def cancel_order(conn, cancel_obj):
         for row in rows:
             resp = TransactionSubResponse(row[0], row[1], row[2], 'random_time')
             cancel_resp.trans_resp.append(resp)
-            if row[0] = 'cancelled'
 
     except psycopg2.IntegrityError:
         # raise
@@ -458,7 +459,7 @@ def test_cancel():
     #     pass
     print(resp)
 
-# test_cancel()
+test_cancel()
 
 '''
 Match all orders on a given symbol.
@@ -498,7 +499,7 @@ def match_order(conn, symbol):
         cur.execute('''SELECT trans_id, amount, limit_price, account_id FROM Orders
                     WHERE symbol=%s AND status = 'open' AND amount < 0 AND
                     limit_price = (SELECT min(limit_price) FROM Orders WHERE amount<0 AND symbol = %s);''', (symbol, symbol))
-                    open_sell_orders = cur.fetchall()
+        open_sell_orders = cur.fetchall()
 
         if not open_sell_orders:
             print('No sell orders open for symbol')
@@ -565,4 +566,4 @@ def match_order(conn, symbol):
         print (sys.exc_info())
         return
 
-match_order(connect(), 'aa')
+# match_order(connect(), 'aa')
