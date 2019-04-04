@@ -10,7 +10,7 @@ _maintainer_ = "Prathikshaa Rangarajan"
 
 import xml.etree.ElementTree as ET
 
-
+order_id=1
 
 """
 classes for Create_obj
@@ -141,7 +141,8 @@ class Transaction_obj:
             
         return ''
 
-def parse_xml(recv_string,order_id):
+def parse_xml(recv_string):
+    global order_id
     root=ET.fromstring(recv_string)
     #process create object here
     if root.tag=='create':

@@ -21,16 +21,14 @@ def recvall(sock,total_msg_len):
     return msg
 pass
 
-order_id=1
 
 def process_request(connection, client_address):
-    global order_id
     try:
         print('connection from', client_address)
         # Receive the data in small chunks and retransmit it
         length=recvall(connection,28)
         recv_string=recvall(connection,int.from_bytes(length, byteorder='big'))
-        obj=parse_xml(recv_string,order_id)
+        obj=parse_xml(recv_string)
         # for sub in obj.sequence:
         #     if sub.type=='account':
         #         obj = create_account(connect(),sub)
@@ -62,7 +60,6 @@ def process_request(connection, client_address):
                 db_conn.close()
             if sub.type == 'order':
                 db_conn = connect()
-                order_id += 1
                 new_obj = create_order(db_conn, sub, obj.account_id)
                 response.append(new_obj)
                 print(new_obj)

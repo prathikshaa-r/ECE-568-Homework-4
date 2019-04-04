@@ -8,6 +8,7 @@ _maintainer_= "Prahikshaa Rangarajan"
 
 import psycopg2
 import sys
+import threading
 
 from xml_parser_header import *
 from response_obj import *
@@ -25,6 +26,10 @@ from response_obj import *
 # from parser.xml_parser_header import Accounts
 
 # Connects to the database and returns database connection object
+
+lock_table={}
+account_lock=threading.Lock
+
 def connect():
     database = 'exchange_matching'
     retry = 5
@@ -63,7 +68,8 @@ def create_account(conn, account):
         account.created = False
         account.err = "Invalid Account Format" + sys.exc_info()
 
-    try:    
+    try:
+        account_lock.acquire()
         cur = conn.cursor()
         cur.execute('''INSERT INTO Accounts
         (account_id, balance)
@@ -71,6 +77,7 @@ def create_account(conn, account):
                     , (account.account_id, account.balance))
 
         conn.commit()
+        account_lock.release()
 
     except psycopg2.IntegrityError:
         account.created = False
@@ -116,6 +123,14 @@ def create_position(conn, position):
 
     # read-modify write start
     # lock(symbol)
+        l=0
+        if position.symbol in lock_table.keys():
+            l=lock_table[position.symbol]
+            l.acquire()
+        else:
+            lock_table[position.symbol]=threading.Lock
+            l=lock_table[position.symbol]
+            l.acquire()
         cur.execute('''SELECT COUNT(*) FROM Positions
         WHERE symbol = %s AND account_id = %s''', (position.symbol, position.account_id))
         row = cur.fetchone()
@@ -132,6 +147,7 @@ def create_position(conn, position):
             pass
 
         conn.commit()
+        l.release()
     # unlock(symbol)
     # read-modify-write end
 

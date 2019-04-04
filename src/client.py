@@ -150,8 +150,11 @@ sock.connect(server_address)
 # test.append(test5())
 # test.append(test6())
 # test.append(test7())
-
-sent=test1()
+sent=0
+if sys.argv[1]='1':
+    sent=test1()
+elif sys.argv[1]='2':
+    sent=test2()
 length=len(sent)
 sock.send(length.to_bytes(28,'big'))
 sock.send(sent.encode())
