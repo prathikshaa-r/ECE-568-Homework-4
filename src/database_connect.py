@@ -388,8 +388,6 @@ def refund(conn, account_id, refund_amount):
         throw
     return
 
-
-# todo: credit money and shares back to buyer and seller when transac cancelled
 def cancel_order(conn, cancel_obj):
     cancel_resp = TransactionResponse(cancel_obj.trans_id, 'cancel')
 
@@ -403,7 +401,25 @@ def cancel_order(conn, cancel_obj):
     try:
         cur = conn.cursor()
 
-        cur.execute('''UPDATE Orders SET Status='cancelled' WHERE trans_id=%s AND Status = 'open';''', (trans_id,))
+        cur.execute('''UPDATE Orders SET Status='cancelled' 
+            WHERE trans_id=%s AND Status = 'open'
+            RETURNING symbol, amount, limit_price, account_id;''', (trans_id,))
+        cancelled_orders = cur.fetchall()
+        for cancelled_order in cancelled_orders:
+            symbol = cancelled_order[0]
+            amount = cancelled_order[1]
+            limit_price = cancelled_order[2]
+            account_id = cancelled_order[3]
+            if amount < 0:
+                position = Position(conn, symbol, account_id, amount)
+                pass
+            else:
+                refund_amount = limit_price * amount
+                refund(conn, account_id, refund_amount)
+                pass
+            pass
+        conn.commit()
+
         
         cur.execute('''SELECT status, amount, limit_price FROM Orders WHERE trans_id = %s;''', (trans_id,))
         rows = cur.fetchall()
@@ -415,7 +431,7 @@ def cancel_order(conn, cancel_obj):
         for row in rows:
             resp = TransactionSubResponse(row[0], row[1], row[2], 'random_time')
             cancel_resp.trans_resp.append(resp)
-
+            if row[0] = 'cancelled'
 
     except psycopg2.IntegrityError:
         # raise
@@ -428,8 +444,6 @@ def cancel_order(conn, cancel_obj):
         cancel_resp.err = "Failed to cancel transaction ID " + sys.exc_info()
         pass
 
-    conn.commit()
-    pass
     return cancel_resp
 
 def test_cancel():
