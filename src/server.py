@@ -7,6 +7,7 @@ import threading
 from xml_parser_header import parse_xml
 from database_connect import *
 from database_setup import *
+from response import *
 
 
 def recvall(sock,total_msg_len):
@@ -94,7 +95,7 @@ sock.bind(server_address)
 
 # Listen for incoming connections                                                                                
 sock.listen(1)
-a=threading.Lock.acquire()
+
 while True:
     # Wait for a connection                                                                                      
     print('waiting for a connection')
