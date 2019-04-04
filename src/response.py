@@ -50,20 +50,24 @@ def transaction_response(response):
                 node.text=child.err
         if child.type == 'query' or child.type == 'cancel':
             attributes={"id":str(child.trans_id)}
-            if child.type=='query':
-                node=SubElement(top,'status',attributes)
-            if child.type=='cancel':
-                node=SubElement(top,'canceled',attributes)
-            for grand_child in child.trans_resp:
-                if(grand_child.status=='open'):
-                    sub_attributes = {"shares": str(grand_child.shares)}
-                    subnode = SubElement(node, 'open', sub_attributes)
-                if(grand_child.status=='canceled'):
-                    sub_attributes = {"shares": str(grand_child.shares), "time": str(grand_child.time)}
-                    subnode = SubElement(node, 'canceled', sub_attributes)
-                if(grand_child.status=='executed'):
-                    sub_attributes = {"shares": str(grand_child.shares), "price": str(grand_child.price), "time": str(grand_child.time)}
-                    subnode = SubElement(node, 'executed', sub_attributes)
+            if(child.success):
+                if child.type=='query':
+                    node=SubElement(top,'status',attributes)
+                if child.type=='cancel':
+                    node=SubElement(top,'canceled',attributes)
+                for grand_child in child.trans_resp:
+                    if(grand_child.status=='open'):
+                        sub_attributes = {"shares": str(grand_child.shares)}
+                        subnode = SubElement(node, 'open', sub_attributes)
+                    if(grand_child.status=='canceled'):
+                        sub_attributes = {"shares": str(grand_child.shares), "time": str(grand_child.time)}
+                        subnode = SubElement(node, 'canceled', sub_attributes)
+                    if(grand_child.status=='executed'):
+                        sub_attributes = {"shares": str(grand_child.shares), "price": str(grand_child.price), "time": str(grand_child.time)}
+                        subnode = SubElement(node, 'executed', sub_attributes)
+            else:
+                node=SubElement(top,'error',attributes)
+                node.text=child.err
     return prettify(top)
 
 """
