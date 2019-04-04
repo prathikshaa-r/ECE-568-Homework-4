@@ -404,22 +404,32 @@ def match_order(conn, symbol):
         WHERE symbol = %s AND status = 'open' AND
         limit_price = (SELECT max(limit_price) FROM Orders WHERE amount>0);''', (symbol,))
         open_buy_orders = cur.fetchall()
+
         if not open_buy_orders:
             print('No buy orders open for symbol')
             return
+
+        top_buy_order
+        top_index
+        
         for open_buy_order in open_buy_orders:
-            print()
+            print(open_buy_order)
             pass
 
         cur.execute('''SELECT trans_id, amount, limit_price, account_id FROM Orders
         WHERE symbol=%s AND status = 'open' AND
         limit_price = (SELECT min(limit_price) FROM Orders WHERE amount<0);''', (symbol,))
         open_sell_orders = cur.fetchall()
+
         if not open_sell_orders:
             print('No sell orders open for symbol')
             return
+
+        top_sell_order
+        top_sell_index
+        
         for open_sell_order in open_sell_orders:
-            print()
+            print(open_sell_order)
             pass
             
 
@@ -427,4 +437,4 @@ def match_order(conn, symbol):
         print('Datbase Error: Order matching failed')
     return
 
-match_order(connect(), 'SPY')
+match_order(connect(), 'aa')
