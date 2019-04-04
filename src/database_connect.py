@@ -44,7 +44,7 @@ def connect():
             print("Failed to connect to database ", database)
             time.sleep(3)
             retry = retry - 1
-            print("retry left ")
+            print("%s retries left", retry)
     return conn
 
 
@@ -68,6 +68,7 @@ def create_account(conn, account):
     except: # ValueError
         account.created = False
         account.err = "Invalid Account Format" + sys.exc_info()
+        return account
 
     try:
         account_lock.acquire()
@@ -84,7 +85,7 @@ def create_account(conn, account):
         account.created = False
         account.err = "Account already exists."
     except:
-        account.creasted = False
+        account.created = False
         account.err = "Account creation failed due to unknown reasons." + sys.exc_info()
         # print ('Failed to create account', sys.exc_info())
         pass
@@ -120,20 +121,20 @@ def create_position(conn, position):
     except: # ValueError
         position.created = False
         position.err = "Invalid position format"  + sys.exc_info()
+        return position
 
     try:
         cur = conn.cursor()
 
     # read-modify write start
     # lock(symbol)
-        l=0
         if position.symbol in lock_table.keys():
-            l=lock_table[position.symbol]
-            l.acquire()
+            symbol_lock=lock_table[position.symbol]
+            symbol_lock.acquire()
         else:
             lock_table[position.symbol]=threading.Lock
-            l=lock_table[position.symbol]
-            l.acquire()
+            symbol_lock=lock_table[position.symbol]
+            symbol_lock.acquire()
         cur.execute('''SELECT COUNT(*) FROM Positions
         WHERE symbol = %s AND account_id = %s''', (position.symbol, position.account_id))
         row = cur.fetchone()
@@ -190,6 +191,7 @@ def create_order(conn, order, account_id):
     except: # ValueError
         order.success = False
         order.err = "Invalid order creation inputs"
+        return order
 
     buy = True
     if order.amount < 0 :
@@ -260,14 +262,13 @@ def create_sell_order(conn, order, account_id):
         cur = conn.cursor()
     # read-modify-write start
     # lock(Positions)
-        l = 0
         if order.symbol in lock_table.keys():
-            l = lock_table[order.symbol]
-            l.acquire()
+            symbol_lock = lock_table[order.symbol]
+            symbol_lock.acquire()
         else:
             lock_table[order.symbol] = threading.Lock
-            l = lock_table[order.symbol]
-            l.acquire()
+            symbol_lock = lock_table[order.symbol]
+            symbol_lock.acquire()
 
         cur.execute('''SELECT COUNT(*) FROM Positions 
         WHERE symbol = %s AND account_id = %s AND amount > (-%s)''', (order.symbol, account_id, order.amount))
@@ -300,8 +301,7 @@ def create_sell_order(conn, order, account_id):
         pass
 
     conn.commit()
-    pass
-    l.release()
+    symbol_lock.release()
     return order
 
 def test_order():
