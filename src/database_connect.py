@@ -9,6 +9,8 @@ _maintainer_= "Prahikshaa Rangarajan"
 import psycopg2
 import sys
 import threading
+import time
+
 
 from xml_parser_header import *
 from response_obj import *
