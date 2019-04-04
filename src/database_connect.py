@@ -482,16 +482,17 @@ def match_order(conn, symbol):
             match = True
 
             # determine exec_price 
-            if buy_match[0] >= sell_match[0]:
+            if buy_match[0] <= sell_match[0]:
                 buyer_price = True
                 exec_price = buy_match[2]
                 pass
             else:
+                buyer_price = False
                 exec_price = sell_match[2]
                 pass
 
             # determine exec_shares
-            if buy_match[1] >= sell_match[1]:
+            if buy_match[1] <= sell_match[1]:
                 buyer_shares = True
                 exec_shares = buy_match[1]
                 pass
@@ -515,9 +516,16 @@ def match_order(conn, symbol):
                 pass
 
             # insert exec_shares into buyer account Positions
-            
-            
-                
+            position = Position(symbol, buy_match[3], exec_shares)
+            create_position(conn, position)
+
+            # credit seller account with transac_cost
+        # lock(Accounts)
+            cur.execute('''UPDATE Accounts SET balance = balance + %s
+            WHERE account_id = %s''', (transac_cost, sell_match[3]))
+        # unlock(Accounts)
+
+        
                     
 
     except psycopg2.IntegrityError:
