@@ -72,7 +72,18 @@ def process_request(connection, client_address):
                 new_obj = query_order(db_conn, sub)
                 response.append(new_obj)
                 print(new_obj)
+                print("Error:")
+                print(new_obj.err)
                 db_conn.close()
+            if sub.type =='cancel':
+                db_conn == connnect()
+                new_obj == cancel_order(db_conn,sub)
+                response.append(new_obj)
+                print(new_obj)
+                print("Error:")
+                print(new_obj.err)
+                db_conn.close()
+
         if obj.type == 'create':
             connection.send(create_response(response).encode('utf-8'))
         if obj.type == 'transac':
