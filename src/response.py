@@ -59,7 +59,7 @@ def transaction_response(response):
                     if(grand_child.status=='open'):
                         sub_attributes = {"shares": str(grand_child.shares)}
                         subnode = SubElement(node, 'open', sub_attributes)
-                    if(grand_child.status=='canceled'):
+                    if(grand_child.status=='cancelled'):
                         sub_attributes = {"shares": str(grand_child.shares), "time": str(grand_child.time)}
                         subnode = SubElement(node, 'canceled', sub_attributes)
                     if(grand_child.status=='executed'):

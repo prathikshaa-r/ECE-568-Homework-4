@@ -144,6 +144,7 @@ def test11():
     top.attrib = attributes1
     attributes2 = {'id': '2'}
     SubElement(top, 'query', attributes2)
+    return prettify(top)
 test.append(test11())
 
 
