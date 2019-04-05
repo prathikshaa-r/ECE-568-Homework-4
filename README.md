@@ -4,7 +4,9 @@ Exchange Server
 
 **Language**:     Python
 
-**Description**:  Multi-threaded Server Program that processes incoming XML requests and returns XML reesponses.
+**Description**:  Multi-threaded Server Program that simulates a simple Exchange Matching Server using XML for requests and responses. Allows creation of accounts, positions(or stocks held) under the account. Transactions include creating orders, querying the status of a unique order id and cancelling orders using the order id.
+
+Sample request and response template may be seen in the <erss-hwk4-pr109-yz476/test> folder as create_template.xml and transaction_template.xml.
 
 **Usage:**
 ----------
@@ -46,54 +48,54 @@ After this 6 numbers, another line will tell you the total excution time of this
         <account id="98765">100000</account>
       </symbol>
     </create>
-    
+
     <?xml version="1.0" ?>
     <transactions id="01234">
       <order amount="-250" limit="100" sym="Test2"/>
     </transactions>
-    
+
     <?xml version="1.0" ?>
     <transactions id="234567">
       <order amount="-400" limit="100" sym="Test2"/>
     </transactions>
-    
+
     <?xml version="1.0" ?>
     <transactions id="123456">
       <order amount="400" limit="150" sym="Test2"/>
     </transactions>
-    
+
     <?xml version="1.0" ?>
     <transactions id="123456">
       <order amount="5000" limit="1000" sym="Test2"/>
     </transactions>
-    
+
     <?xml version="1.0" ?>
     <transactions id="98765">
       <order amount="5000" limit="1000" sym="Test2"/>
       <query id="2"/>
       <cancel id="3"/>
     </transactions>
-    
+
     <?xml version="1.0" ?>
     <transactions id="01234">
       <query id="1"/>
     </transactions>
-    
+
     <?xml version="1.0" ?>
     <transactions id="123456">
       <query id="3"/>
     </transactions>
-    
+
     <?xml version="1.0" ?>
     <transactions id="234567">
       <query id="2"/>
     </transactions>
-    
+
     <?xml version="1.0" ?>
     <transactions id="234567">
       <cancel id="2"/>
     </transactions>
-    
+
     <?xml version="1.0" ?>
     <transactions id="234567">
       <query id="2"/>
