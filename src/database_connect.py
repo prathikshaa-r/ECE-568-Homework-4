@@ -517,7 +517,6 @@ def test_cancel():
     #     pass
     print(resp)
 
-test_cancel()
 
 '''
 Match all orders on a given symbol.
