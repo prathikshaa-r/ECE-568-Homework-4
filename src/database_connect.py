@@ -224,15 +224,8 @@ def create_order(conn, order, account_id):
         pass
     match = True
     while match:
-        if order.symbol in lock_table.keys():
-            symbol_lock=lock_table[order.symbol]
-            symbol_lock.acquire()
-        else:
-            lock_table[order.symbol]=threading.Lock()
-            symbol_lock=lock_table[order.symbol]
-            symbol_lock.acquire()
         match = match_order(conn, order.symbol)
-        symbol_lock.release()
+        # symbol_lock.release()
     return order
 
 # thread-safe
@@ -528,6 +521,7 @@ account balance update requires a global lock
 # requires a symbol lock -- thread unsafe for symbols
 def match_order(conn, symbol):
     global account_lock
+    global lock_table
     # get highest buy order
     # get lowest sell order
     # if they match
@@ -537,6 +531,11 @@ def match_order(conn, symbol):
     # update Positions in buyer account
 
     # lock(symbol)
+    if order.symbol in lock_table.keys():
+            symbol_lock=lock_table[order.symbol]
+            symbol_lock.acquire()
+        else:
+            return False
     try:
         match = False
         cur = conn.cursor()
@@ -547,6 +546,7 @@ def match_order(conn, symbol):
 
         if not open_buy_orders:
             print('No buy orders open for symbol')
+            symbol_lock.release()
             return match
 
         # debug print
@@ -565,6 +565,7 @@ def match_order(conn, symbol):
 
         if not open_sell_orders:
             print('No sell orders open for symbol')
+            symbol_lock.release()
             return match
 
         # debug print
@@ -614,10 +615,7 @@ def match_order(conn, symbol):
                 # unlock(Accounts)
                 pass
 
-            # insert exec_shares into buyer account Positions
-            position = Position(symbol, buy_match[3], exec_shares)
-            create_position(conn, position)
-
+           
             # credit seller account with transac_cost
         # lock(Accounts)
             print('seller account_id = ', sell_match[3])
@@ -646,6 +644,12 @@ def match_order(conn, symbol):
                 VALUES(%s, %s, %s, %s, %s, %s)''',
                 (buy_match[0], symbol, exec_shares, buy_match[2], buy_match[3], 'executed'))
             pass
+
+        symbol_lock.release()
+        
+        # insert exec_shares into buyer account Positions
+        position = Position(symbol, buy_match[3], exec_shares)
+        create_position(conn, position)
 
         print('num of shares = ', exec_shares)
         print('transaction price = ', transac_cost)
