@@ -1,10 +1,18 @@
-# Exchange Server
-Go to erss-hwk4-pr109-yz476 folder and run 'sudo docker-compose up' to deploy the server.
+Exchange Server
+===============
+*Developers*:   Prathikshaa Rangarajan, Yanjia Zhao
+*Language*:     Python
+*Description*:  Multi-threaded Server Program that processes incoming XML requests and returns XML reesponses.
 
-Under erss-hwk4-pr109-yz476 folder, go to test folder, you can run 'sh test.sh' to test the functionality of the server.
-This test will send a sequence of requests and then recieve corresponding responses.
-The sent requests are listed below (following these sequence), and you can check the reponses to see if they are resonable.
-Before you execute this script, you need to open client.py and go to line 183 to change the address to be the server's address.
+*Usage*
+    cd erss-hwk4-pr109-yz476
+    sudo docker-compose up
+
+*Tests*
+**Configuration**
+Open erss-hwk4-pr109-yz476/test/client.py, line 183 and update the address it connects to, to the address of the server where the application is running.
+    cd erss-hwk4-pr109-yz476/test
+    sh test.sh
 
 ## Scalability Tests
 Another test program is scalability_test.py. It can send many random requests. You can run it with one argument with specify the number of request that this prgram will send, e.g. ' python3 scalability_test.py 1000'. Also, before executing this program, please go to line 56 to change the address to be the server's address.
