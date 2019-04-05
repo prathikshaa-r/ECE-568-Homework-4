@@ -531,8 +531,8 @@ def match_order(conn, symbol):
     # update Positions in buyer account
 
     # lock(symbol)
-    if order.symbol in lock_table.keys():
-            symbol_lock=lock_table[order.symbol]
+    if symbol in lock_table.keys():
+            symbol_lock=lock_table[symbol]
             symbol_lock.acquire()
         else:
             return False
