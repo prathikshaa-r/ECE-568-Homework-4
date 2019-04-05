@@ -1,20 +1,24 @@
 Exchange Server
 ===============
-*Developers*:   Prathikshaa Rangarajan, Yanjia Zhao
-*Language*:     Python
-*Description*:  Multi-threaded Server Program that processes incoming XML requests and returns XML reesponses.
+**Developers**:   Prathikshaa Rangarajan, Yanjia Zhao
 
-*Usage*
+**Language**:     Python
+
+**Description**:  Multi-threaded Server Program that processes incoming XML requests and returns XML reesponses.
+
+**Usage:**
+----------
     cd erss-hwk4-pr109-yz476
     sudo docker-compose up
 
-*Tests*
-**Configuration**
+## Tests
+### Configuration
+
 Open erss-hwk4-pr109-yz476/test/client.py, line 183 and update the address it connects to, to the address of the server where the application is running.
     cd erss-hwk4-pr109-yz476/test
     sh test.sh
 
-## Scalability Tests
+### Scalability Testing
 Another test program is scalability_test.py. It can send many random requests. You can run it with one argument with specify the number of request that this prgram will send, e.g. ' python3 scalability_test.py 1000'. Also, before executing this program, please go to line 56 to change the address to be the server's address.
 The scalability_test function will produce 6 numbers, each represents the number of requests whose latency lies in the corresponding gap.
 The first number corresonds to the latency from 0 to 10 ms, and the second corresonds to the latency from 10 to 20 ms ... The last number is the number of requests whose latency is larger than 50 ms. 
