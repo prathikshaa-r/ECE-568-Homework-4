@@ -17,7 +17,16 @@ while retry:
         time.sleep(3)
         retry-=1
 
+try:    
+    cur = conn.cursor()
+    cur.execute('''DROP TABLE IF EXISTS Accounts;''')
+    cur.execute('''DROP TABLE IF EXISTS Positions;''')
+    cur.execute('''DROP TABLE IF EXISTS Orders;''')
 
+    conn.commit()
+except:
+    print ('Error: Drop tables')
+    pass
 
 try:    
     cur = conn.cursor()
