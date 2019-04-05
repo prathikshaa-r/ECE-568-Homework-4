@@ -232,6 +232,7 @@ def create_order(conn, order, account_id):
             symbol_lock=lock_table[order.symbol]
             symbol_lock.acquire()
         match = match_order(conn, order.symbol)
+        symbol_lock.release()
     return order
 
 # thread-safe
