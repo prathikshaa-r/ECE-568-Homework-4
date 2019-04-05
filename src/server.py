@@ -76,7 +76,7 @@ def process_request(connection, client_address):
                 print(new_obj.err)
                 db_conn.close()
             if sub.type =='cancel':
-                db_conn = connnect()
+                db_conn = connect()
                 new_obj = cancel_order(db_conn,sub)
                 response.append(new_obj)
                 print(new_obj)
