@@ -19,9 +19,10 @@ while retry:
 
 try:    
     cur = conn.cursor()
-    cur.execute('''DROP TABLE IF EXISTS Accounts;''')
-    cur.execute('''DROP TABLE IF EXISTS Positions;''')
-    cur.execute('''DROP TABLE IF EXISTS Orders;''')
+    cur.execute('''DROP TABLE IF EXISTS Orders CASCADE;''')
+    cur.execute('''DROP TYPE IF EXISTS order_status CASCADE;''')
+    cur.execute('''DROP TABLE IF EXISTS Positions CASCADE;''')
+    cur.execute('''DROP TABLE IF EXISTS Accounts CASCADE;''')
 
     conn.commit()
 except:
