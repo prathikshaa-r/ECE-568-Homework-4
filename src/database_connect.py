@@ -443,16 +443,21 @@ def cancel_order(conn, cancel_obj):
             cancel_resp.success = False
             cancel_resp.err = 'No Orders with given trans_id'
             return cancel_resp
+        sym_set = set()
         for symbol in symbols:
             # print(symbol[0])
-            lock_table[symbol[0]].acquire()
+            sym_set.add(symbol[0])
+            pass
+
+        for sym in sym_set:
+            lock_table[sym].acquire()
             pass
 
         cur.execute('''UPDATE Orders SET Status='cancelled' 
             WHERE trans_id=%s AND Status = 'open'
             RETURNING symbol, amount, limit_price, account_id;''', (trans_id,))
-        for symbol in symbols:
-            lock_table[symbol[0]].release()
+        for sym in sym_set:
+            lock_table[sym].release()
             pass
 
         cancelled_orders = cur.fetchall()
