@@ -435,21 +435,25 @@ def cancel_order(conn, cancel_obj):
         cancel_resp.err = 'Invalid format of transaction id'
         return cancel_resp
 
-    if cancel_obj.symbol in lock_table.keys():
-        symbol_lock=lock_table[cancel_obj.symbol]
-        symbol_lock.acquire()
-    else:
-        cancel_resp.success = False
-        cancel_resp.err = 'Symbol does not exist'
-        return cancel_resp
-
     try:
         cur = conn.cursor()
+        cur.execute('''SELECT symbol FROM Orders WHERE trans_id=%s;''',(cancel_obj.trans_id,))
+        symbols = cur.fetchall()
+        if not symbols:
+            cancel_resp.success = False
+            cancel_resp.err = 'No Orders with given trans_id'
+            return cancel_resp
+        for symbol in symbols:
+            # print(symbol[0])
+            lock_table[symbol[0]].acquire()
+            pass
 
         cur.execute('''UPDATE Orders SET Status='cancelled' 
             WHERE trans_id=%s AND Status = 'open'
             RETURNING symbol, amount, limit_price, account_id;''', (trans_id,))
-        symbol_lock.release()
+        for symbol in symbols:
+            lock_table[symbol[0]].release()
+            pass
 
         cancelled_orders = cur.fetchall()
         for cancelled_order in cancelled_orders:
@@ -477,7 +481,6 @@ def cancel_order(conn, cancel_obj):
         if not rows:
             cancel_resp.success = False
             cancel_resp.err = 'No orders found with given transaction id'
-            symbol_lock.release()
             return cancel_resp
         
         for row in rows:
@@ -495,11 +498,10 @@ def cancel_order(conn, cancel_obj):
         cancel_resp.err = "Failed to cancel transaction ID " + sys.exc_info()
         pass
 
-    symbol_lock.release()
     return cancel_resp
 
 def test_cancel():
-    cancel_obj = Cancel(1)
+    cancel_obj = Cancel(4)
     resp = cancel_order(connect(), cancel_obj)
     # for row in resp.trans_resp:
     #     print(row)
@@ -510,7 +512,7 @@ def test_cancel():
     #     pass
     print(resp)
 
-# test_cancel()
+test_cancel()
 
 '''
 Match all orders on a given symbol.
@@ -532,10 +534,10 @@ def match_order(conn, symbol):
 
     # lock(symbol)
     if symbol in lock_table.keys():
-            symbol_lock=lock_table[symbol]
-            symbol_lock.acquire()
-        else:
-            return False
+        symbol_lock=lock_table[symbol]
+        symbol_lock.acquire()
+    else:
+        return False
     try:
         match = False
         cur = conn.cursor()
