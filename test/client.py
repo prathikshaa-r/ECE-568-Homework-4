@@ -95,10 +95,10 @@ def test6():
     top.attrib = attributes1
     attributes2 = {'sym': 'Test2', 'amount': '5000', 'limit': '1000'}
     SubElement(top, 'order', attributes2)
-    # attributes3 = {'id': '2'}
-    # SubElement(top, 'query', attributes3)
-    # attributes4 = {'id': '3'}
-    # SubElement(top, 'cancel', attributes4)
+    attributes3 = {'id': '2'}
+    SubElement(top, 'query', attributes3)
+    attributes4 = {'id': '3'}
+    SubElement(top, 'cancel', attributes4)
     return prettify(top)    #err
 test.append(test6())
 
