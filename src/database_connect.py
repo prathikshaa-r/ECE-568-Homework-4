@@ -399,7 +399,7 @@ def test_query():
     #     pass
     print(resp)
 
-test_query()
+# test_query()
 
 # used to credit money to accounts on successful sell/buy or refunded buy
 # not thread safe
@@ -646,7 +646,7 @@ def match_order(conn, symbol):
             pass
 
         symbol_lock.release()
-        
+
         # insert exec_shares into buyer account Positions
         position = Position(symbol, buy_match[3], exec_shares)
         create_position(conn, position)
