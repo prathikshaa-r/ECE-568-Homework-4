@@ -1,4 +1,4 @@
-## Exchange Server
+# Exchange Server
 Go to erss-hwk4-pr109-yz476 folder and run 'sudo docker-compose up' to deploy the server.
 
 Under erss-hwk4-pr109-yz476 folder, go to test folder, you can run 'sh test.sh' to test the functionality of the server.
@@ -6,7 +6,7 @@ This test will send a sequence of requests and then recieve corresponding respon
 The sent requests are listed below (following these sequence), and you can check the reponses to see if they are resonable.
 Before you execute this script, you need to open client.py and go to line 183 to change the address to be the server's address.
 
-# Scalability Tests
+## Scalability Tests
 Another test program is scalability_test.py. It can send many random requests. You can run it with one argument with specify the number of request that this prgram will send, e.g. ' python3 scalability_test.py 1000'. Also, before executing this program, please go to line 56 to change the address to be the server's address.
 The scalability_test function will produce 6 numbers, each represents the number of requests whose latency lies in the corresponding gap.
 The first number corresonds to the latency from 0 to 10 ms, and the second corresonds to the latency from 10 to 20 ms ... The last number is the number of requests whose latency is larger than 50 ms. 
