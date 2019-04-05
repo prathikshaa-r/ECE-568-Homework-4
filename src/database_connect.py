@@ -218,8 +218,9 @@ def create_order(conn, order, account_id):
         print('is a sell order')
         order = create_sell_order(conn, order, account_id)
         pass
-
-    # match_order(conn, order.symbol)
+    match = True
+    while match:
+        match = match_order(conn, order.symbol)
     return order
 
 # thread-safe
