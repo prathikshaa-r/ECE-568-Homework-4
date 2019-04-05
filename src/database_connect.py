@@ -62,6 +62,8 @@ def connect():
 #test_account= Account()
 #create_account(connect(), test_account)
 
+# thread-safe
+# basic exception guarantee
 def create_account(conn, account):
     global account_lock
     try:
@@ -115,6 +117,8 @@ def test_account_creation():
 #test_position = Position()
 #create_position(connect(), test_position)
 
+# thread-safe
+# basic exception guarantee
 def create_position(conn, position):
     global lock_table
     try:
@@ -122,7 +126,7 @@ def create_position(conn, position):
         account_id_int = int(position.account_id)
     except: # ValueError
         position.created = False
-        position.err = "Invalid position format"  + sys.exc_info()
+        position.err = "Invalid position format" + sys.exc_info()
         return position
 
     try:
@@ -165,7 +169,7 @@ def create_position(conn, position):
         # print ('Failed to create position', sys.exc_info())
         # pass
         position.created = False
-        position.err = "Postion creation failed due to unknown reasons." # + sys.exc_info()
+        position.err = "Position creation failed due to unknown reasons." # + sys.exc_info()
     conn.commit()
     symbol_lock.release()
     return position
@@ -220,6 +224,13 @@ def create_order(conn, order, account_id):
         pass
     match = True
     while match:
+        if position.symbol in lock_table.keys():
+            symbol_lock=lock_table[position.symbol]
+            symbol_lock.acquire()
+        else:
+            lock_table[position.symbol]=threading.Lock()
+            symbol_lock=lock_table[position.symbol]
+            symbol_lock.acquire()
         match = match_order(conn, order.symbol)
     return order
 
@@ -237,6 +248,7 @@ def create_buy_order(conn, order, account_id):
         if not row:
             order.success = False
             order.err = 'Account does not exist'
+            account_lock.release()
             return order
         balance = row[0]
         share_price = order.limit_price * order.amount
@@ -244,6 +256,7 @@ def create_buy_order(conn, order, account_id):
             # Insufficient funds error
             order.success = False
             order.err = 'Insufficient Funds'
+            account_lock.release()
             return order
         
         cur.execute('''UPDATE Accounts SET balance = balance-%s WHERE account_id = %s''', (share_price, account_id))
@@ -289,18 +302,20 @@ def create_sell_order(conn, order, account_id):
         if not row:
             order.success = False
             order.err = 'No such position to sell from'
+            symbol_lock.release()
             return order
         position_count = row[0]
         if position_count != 1:
             # Insufficient Shares to sell error
             order.success = False
             order.err = 'Insufficient shares to sell'
+            symbol_lock.release()
             return order
         cur.execute('''UPDATE Positions SET amount = amount + %s 
        WHERE account_id = %s AND symbol = %s''', (order.amount, account_id, order.symbol))
         cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (order.trans_id, order.symbol, order.amount, order.limit_price, account_id))
 
-    # unlock(Postions)
+    # unlock(Positions)
     # read-modify-write end
         conn.commit()
 
@@ -339,6 +354,8 @@ def test_order():
 
 # test_order()
 
+# read-only
+# no locks
 def query_order(conn, query_obj):
     query_resp = TransactionResponse(query_obj.trans_id, 'query')
 
@@ -409,8 +426,12 @@ def refund(conn, account_id, refund_amount):
         throw
     return
 
+
+
 def cancel_order(conn, cancel_obj):
     global account_lock
+    global lock_table
+
     cancel_resp = TransactionResponse(cancel_obj.trans_id, 'cancel')
 
     try:
@@ -420,12 +441,22 @@ def cancel_order(conn, cancel_obj):
         cancel_resp.err = 'Invalid format of transaction id'
         return cancel_resp
 
+    if position.symbol in lock_table.keys():
+        symbol_lock=lock_table[position.symbol]
+        symbol_lock.acquire()
+    else:
+        cancel_resp.success = False
+        cancel_resp.err = 'Symbol does not exist'
+        return cancel_resp
+
     try:
         cur = conn.cursor()
 
         cur.execute('''UPDATE Orders SET Status='cancelled' 
             WHERE trans_id=%s AND Status = 'open'
             RETURNING symbol, amount, limit_price, account_id;''', (trans_id,))
+        symbol_lock.release()
+
         cancelled_orders = cur.fetchall()
         for cancelled_order in cancelled_orders:
             print('cancelled: ', cancelled_order)
@@ -435,12 +466,12 @@ def cancel_order(conn, cancel_obj):
             account_id = cancelled_order[3]
             if amount < 0:
                 position = Position(symbol, account_id, abs(amount))
-                create_position(conn, position)
+                create_position(conn, position) # thread-safe -- uses symbol_lock
                 pass
             else:
                 refund_amount = limit_price * amount
                 account_lock.acquire()
-                refund(conn, account_id, refund_amount)
+                refund(conn, account_id, refund_amount) # not thread-safe
                 account_lock.release()
                 pass
             pass
@@ -452,6 +483,7 @@ def cancel_order(conn, cancel_obj):
         if not rows:
             cancel_resp.success = False
             cancel_resp.err = 'No orders found with given transaction id'
+            symbol_lock.release()
             return cancel_resp
         
         for row in rows:
@@ -469,6 +501,7 @@ def cancel_order(conn, cancel_obj):
         cancel_resp.err = "Failed to cancel transaction ID " + sys.exc_info()
         pass
 
+    symbol_lock.release()
     return cancel_resp
 
 def test_cancel():
@@ -490,6 +523,8 @@ Match all orders on a given symbol.
 Uses symbol lock
 account balance update requires a global lock
 '''
+# safe for accounts based trasnsactions
+# requires a symbol lock -- thread unsafe for symbols
 def match_order(conn, symbol):
     global account_lock
     # get highest buy order
@@ -624,5 +659,6 @@ def match_order(conn, symbol):
         print (sys.exc_info())
         match = False
         return match
+    return match
 
 # match_order(connect(), 'aa')
