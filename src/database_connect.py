@@ -206,6 +206,7 @@ def create_order(conn, order, account_id):
         buy = False
         pass
 
+    print (order.time)
     # """
     # Buy Order
     # Reduce balance in Accounts
@@ -222,6 +223,8 @@ def create_order(conn, order, account_id):
         print('is a sell order')
         order = create_sell_order(conn, order, account_id)
         pass
+    if not order.success:
+        return order
     match = True
     while match:
         match = match_order(conn, order.symbol)
@@ -254,7 +257,7 @@ def create_buy_order(conn, order, account_id):
             return order
         
         cur.execute('''UPDATE Accounts SET balance = balance-%s WHERE account_id = %s''', (share_price, account_id))
-        cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (order.trans_id, order.symbol, order.amount, order.limit_price, account_id))
+        cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id, time) VALUES(%s, %s, %s, %s, %s, %s)''', (order.trans_id, order.symbol, order.amount, order.limit_price, account_id, order.time))
 
     # unlock(Accounts)
     # read-modify-write end
@@ -268,7 +271,7 @@ def create_buy_order(conn, order, account_id):
     except:
         # print ('Failed to create buy order', sys.exc_info())
         order.success = False
-        order.err = 'Failed to create order ' 
+        order.err = 'Failed to create order '  + sys.exc_info()
         pass
     conn.commit()
     account_lock.release()
@@ -307,7 +310,7 @@ def create_sell_order(conn, order, account_id):
             return order
         cur.execute('''UPDATE Positions SET amount = amount + %s 
        WHERE account_id = %s AND symbol = %s''', (order.amount, account_id, order.symbol))
-        cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id) VALUES(%s, %s, %s, %s, %s)''', (order.trans_id, order.symbol, order.amount, order.limit_price, account_id))
+        cur.execute('''INSERT INTO Orders (trans_id, symbol, amount, limit_price, account_id, time) VALUES(%s, %s, %s, %s, %s, %s)''', (order.trans_id, order.symbol, order.amount, order.limit_price, account_id, order.time))
 
     # unlock(Positions)
     # read-modify-write end
@@ -331,22 +334,22 @@ def create_sell_order(conn, order, account_id):
     return order
 
 def test_order():
-    account_id = 1
+    account_id = 12
 
     sym = "abc"
-    amount = -1000
+    amount = 1000
     limit_price = 125
     
     trans_id = 2
-    order = Order(sym, amount, limit_price)
-    create_order(connect(), order, account_id, trans_id)
+    order = Order(sym, amount, limit_price, trans_id)
+    create_order(connect(), order, account_id)
 
     print(order.success)
     print('Error:')
     print(order.err)
     return
 
-# test_order()
+test_order()
 
 # read-only
 # no locks
@@ -362,15 +365,16 @@ def query_order(conn, query_obj):
 
     try:
         cur = conn.cursor()
-        cur.execute('''SELECT status, amount, limit_price FROM Orders WHERE trans_id = %s;''', (trans_id,))
+        cur.execute('''SELECT status, amount, limit_price, time FROM Orders WHERE trans_id = %s;''', (trans_id,))
         rows = cur.fetchall()
         if not rows:
             query_resp.success = False
             query_resp.err = 'No orders found with given transaction id'
             return query_resp
-        
+
         for row in rows:
-            resp = TransactionSubResponse(row[0], row[1], row[2], 'random_time')
+            epoch_time = int(time.time()) - row[3]
+            resp = TransactionSubResponse(row[0], row[1], row[2], epoch_time)
             query_resp.trans_resp.append(resp)
     except psycopg2.IntegrityError:
         # raise
@@ -481,7 +485,7 @@ def cancel_order(conn, cancel_obj):
         conn.commit()
 
         
-        cur.execute('''SELECT status, amount, limit_price FROM Orders WHERE trans_id = %s;''', (trans_id,))
+        cur.execute('''SELECT status, amount, limit_price, time FROM Orders WHERE trans_id = %s;''', (trans_id,))
         rows = cur.fetchall()
         if not rows:
             cancel_resp.success = False
@@ -489,7 +493,8 @@ def cancel_order(conn, cancel_obj):
             return cancel_resp
         
         for row in rows:
-            resp = TransactionSubResponse(row[0], row[1], row[2], 'random_time')
+            epoch_time = int(time.time()) - row[3]
+            resp = TransactionSubResponse(row[0], row[1], row[2], epoch_time)
             cancel_resp.trans_resp.append(resp)
 
     except psycopg2.IntegrityError:
@@ -525,6 +530,7 @@ account balance update requires a global lock
 '''
 # safe for accounts based trasnsactions
 # requires a symbol lock -- thread unsafe for symbols
+
 def match_order(conn, symbol):
     global account_lock
     global lock_table
@@ -545,7 +551,7 @@ def match_order(conn, symbol):
     try:
         match = False
         cur = conn.cursor()
-        cur.execute('''SELECT trans_id, amount, limit_price, account_id  FROM Orders 
+        cur.execute('''SELECT trans_id, amount, limit_price, account_id, time  FROM Orders 
         WHERE symbol = %s AND status = 'open' AND amount > 0 AND
         limit_price = (SELECT max(limit_price) FROM Orders WHERE amount>0 AND symbol = %s);''', (symbol,symbol))
         open_buy_orders = cur.fetchall()
@@ -564,7 +570,7 @@ def match_order(conn, symbol):
         buy_match = sorted(open_buy_orders, key = lambda i: i[0], reverse = False)[0]
         print('buy match: ', buy_match)
 
-        cur.execute('''SELECT trans_id, amount, limit_price, account_id FROM Orders
+        cur.execute('''SELECT trans_id, amount, limit_price, account_id, time FROM Orders
                     WHERE symbol=%s AND status = 'open' AND amount < 0 AND
                     limit_price = (SELECT min(limit_price) FROM Orders WHERE amount<0 AND symbol = %s);''', (symbol, symbol))
         open_sell_orders = cur.fetchall()
@@ -636,9 +642,9 @@ def match_order(conn, symbol):
                 WHERE trans_id = %s''', (buy_match[0],))
             cur.execute('''UPDATE Orders SET amount = amount + %s 
                 WHERE trans_id = %s''', (exec_shares, sell_match[0]))
-            cur.execute('''INSERT INTO Orders(trans_id, symbol, amount, limit_price, account_id, status)
-                VALUES(%s, %s, %s, %s, %s, %s)''',
-                (sell_match[0], symbol, (-exec_shares), sell_match[2], sell_match[3], 'executed'))
+            cur.execute('''INSERT INTO Orders(trans_id, symbol, amount, limit_price, account_id, time, status)
+                VALUES(%s, %s, %s, %s, %s, %s, %s)''',
+                (sell_match[0], symbol, (-exec_shares), sell_match[2], sell_match[3], sell_match[4] , 'executed'))
             pass
         else:
             print('seller sold all %s shares', exec_shares)
@@ -646,9 +652,9 @@ def match_order(conn, symbol):
                 WHERE trans_id = %s''', (sell_match[0],))
             cur.execute('''UPDATE Orders SET amount = amount - %s 
                 WHERE trans_id = %s''', (exec_shares, buy_match[0]))
-            cur.execute('''INSERT INTO Orders(trans_id, symbol, amount, limit_price, account_id, status)
-                VALUES(%s, %s, %s, %s, %s, %s)''',
-                (buy_match[0], symbol, exec_shares, buy_match[2], buy_match[3], 'executed'))
+            cur.execute('''INSERT INTO Orders(trans_id, symbol, amount, limit_price, account_id, time, status)
+                VALUES(%s, %s, %s, %s, %s, %s, %s)''',
+                (buy_match[0], symbol, exec_shares, buy_match[2], buy_match[3], buy_match[4],  'executed'))
             pass
 
         symbol_lock.release()

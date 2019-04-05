@@ -71,6 +71,7 @@ try:
     amount real NOT NULL, /* +ve or -ve real number -ve=>sell */
     limit_price real NOT NULL, /* positive real number */
     account_id int NOT NULL,
+    time int NOT NULL, /* time since epoch */
     status order_status NOT NULL DEFAULT 'open',
     /* need to add time */
     FOREIGN KEY(account_id) REFERENCES Accounts(account_id) ON DELETE CASCADE /* ideally on delete set status to cancelled */
