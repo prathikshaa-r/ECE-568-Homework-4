@@ -101,7 +101,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 # Bind the socket to the port                                                                                    
-server_address = (socket.gethostname(), 10000)
+server_address = (socket.gethostname(), 12345)
 print('starting up on {} port {}'.format(*server_address))
 sock.bind(server_address)
 
