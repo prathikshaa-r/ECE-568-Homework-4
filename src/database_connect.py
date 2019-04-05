@@ -224,12 +224,12 @@ def create_order(conn, order, account_id):
         pass
     match = True
     while match:
-        if position.symbol in lock_table.keys():
-            symbol_lock=lock_table[position.symbol]
+        if order.symbol in lock_table.keys():
+            symbol_lock=lock_table[order.symbol]
             symbol_lock.acquire()
         else:
-            lock_table[position.symbol]=threading.Lock()
-            symbol_lock=lock_table[position.symbol]
+            lock_table[order.symbol]=threading.Lock()
+            symbol_lock=lock_table[order.symbol]
             symbol_lock.acquire()
         match = match_order(conn, order.symbol)
     return order
@@ -441,8 +441,8 @@ def cancel_order(conn, cancel_obj):
         cancel_resp.err = 'Invalid format of transaction id'
         return cancel_resp
 
-    if position.symbol in lock_table.keys():
-        symbol_lock=lock_table[position.symbol]
+    if cancel_obj.symbol in lock_table.keys():
+        symbol_lock=lock_table[cancel_obj.symbol]
         symbol_lock.acquire()
     else:
         cancel_resp.success = False
