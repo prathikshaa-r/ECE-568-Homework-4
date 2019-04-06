@@ -3,12 +3,11 @@
 March 26, 2019
 Creates the required objects that the XML parser reads into.
 """
-
-
 _author_ = "Yanjia Zhao"
 _maintainer_ = "Prathikshaa Rangarajan"
 
 import xml.etree.ElementTree as ET
+import time
 
 order_id=1
 
@@ -81,6 +80,7 @@ class Order:
         self.symbol = symbol
         self.amount = amount
         self.limit_price = limit_price
+        self.time  = int(time.time())
         self.type = 'order'
         self.success = True
         self.status = 'open' # open , executed, cancelled
