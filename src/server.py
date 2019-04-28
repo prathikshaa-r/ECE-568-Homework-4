@@ -23,12 +23,27 @@ def recvall(sock,total_msg_len):
 pass
 
 
+def recv_until_nl(sock):
+    num=""
+    temp=sock.recv(1)
+    temp = temp.decode('utf-8')
+    while temp!='\n':
+        num+=temp
+        temp=sock.recv(1)
+        temp = temp.decode('utf-8')
+    return num
+
+
+
 def process_request(connection, client_address):
     try:
         print('connection from', client_address)
         # Receive the data in small chunks and retransmit it
-        length=recvall(connection,28)
-        recv_string=recvall(connection,int.from_bytes(length, byteorder='big'))
+        #length=recvall(connection,28)
+        num=recv_until_nl(connection)
+        len=int(num)
+        #recv_string=recvall(connection,int.from_bytes(length, byteorder='big'))
+        recv_string=recvall(connection,len)
         obj=parse_xml(recv_string)
         # for sub in obj.sequence:
         #     if sub.type=='account':
