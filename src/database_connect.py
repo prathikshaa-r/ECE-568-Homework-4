@@ -349,7 +349,7 @@ def test_order():
     print(order.err)
     return
 
-test_order()
+#test_order()
 
 # read-only
 # no locks

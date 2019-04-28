@@ -180,7 +180,7 @@ def transaction_request():
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect the socket to the port where the server is listening
-server_address = ('vcm-8454.vm.duke.edu', 12345)
+server_address = ('vcm-9355.vm.duke.edu', 12345)
 print('connecting to {} port {}'.format(*server_address))
 sock.connect(server_address)
 
